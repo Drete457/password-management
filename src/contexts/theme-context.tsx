@@ -18,7 +18,7 @@ interface ThemeContextType {
 }
 
 const defaultTheme: ThemeSettings = {
-  mode: 'light',
+  mode: 'auto',
   fontSize: 'medium',
   accentColor: 'blue'
 };
