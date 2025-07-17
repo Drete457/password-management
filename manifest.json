@@ -3,16 +3,21 @@
   "name": "Password Manager",
   "description": "A password manager extension for secure storage and retrieval of passwords.",
   "version": "0.0.1",
+  "permissions": [
+    "sidePanel",
+    "storage",
+    "activeTab"
+  ],
   "host_permissions": [
     "<all_urls>"
-  ],  
-  "declarative_net_request": {
-    "rule_resources": [
-      {
-        "id": "ruleset_csp_removal",
-        "enabled": true,
-        "path": "src/rules/rules_csp.json"
-      }
-    ]
+  ],
+  "action": {
+    "default_title": "Open Password Manager"
+  },
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "background": {
+    "service_worker": "src/background/background.ts"
   }
 }
