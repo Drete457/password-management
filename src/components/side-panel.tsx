@@ -4,6 +4,7 @@ import { passwordService } from '../services/password-service';
 import { PasswordList } from './password-list';
 import { PasswordForm } from './password-form';
 import { ThemeSettings } from './theme-settings';
+import { FileManager } from './file-manager';
 import { useTheme } from '../contexts/theme-context';
 
 export function SidePanel() {
@@ -11,6 +12,7 @@ export function SidePanel() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showForm, setShowForm] = useState<boolean>(false);
   const [showThemeSettings, setShowThemeSettings] = useState<boolean>(false);
+  const [showFileManager, setShowFileManager] = useState<boolean>(false);
   const [editingPassword, setEditingPassword] = useState<PasswordEntry | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [currentDomain, setCurrentDomain] = useState<string>('');
@@ -156,19 +158,37 @@ export function SidePanel() {
               </div>
             )}
           </div>
-          <button
-            onClick={() => setShowThemeSettings(!showThemeSettings)}
-            className="p-2 rounded-lg hover:bg-white hover:bg-opacity-20 transition-colors"
-            title="Theme Settings"
-          >
-            <span className="text-lg">{isDark ? '🌙' : '☀️'}</span>
-          </button>
+          <div className="flex space-x-2">
+            <button
+              onClick={() => setShowFileManager(!showFileManager)}
+              className="p-2 rounded-lg hover:bg-white hover:bg-opacity-20 transition-colors"
+              title="File Manager"
+            >
+              <span className="text-lg">📁</span>
+            </button>
+            <button
+              onClick={() => setShowThemeSettings(!showThemeSettings)}
+              className="p-2 rounded-lg hover:bg-white hover:bg-opacity-20 transition-colors"
+              title="Theme Settings"
+            >
+              <span className="text-lg">{isDark ? '🌙' : '☀️'}</span>
+            </button>
+          </div>
         </div>
       </header>
 
       {showThemeSettings && (
         <div className="p-4 themed-bg-primary border-b themed-border">
           <ThemeSettings onClose={() => setShowThemeSettings(false)} />
+        </div>
+      )}
+
+      {showFileManager && (
+        <div className="p-4 themed-bg-primary border-b themed-border">
+          <FileManager 
+            onImportComplete={loadPasswords}
+            onClose={() => setShowFileManager(false)} 
+          />
         </div>
       )}
 
