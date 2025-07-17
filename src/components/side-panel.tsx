@@ -3,14 +3,18 @@ import { PasswordEntry } from '../types/password';
 import { passwordService } from '../services/password-service';
 import { PasswordList } from './password-list';
 import { PasswordForm } from './password-form';
+import { ThemeSettings } from './theme-settings';
+import { useTheme } from '../contexts/theme-context';
 
 export function SidePanel() {
   const [passwords, setPasswords] = useState<PasswordEntry[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showForm, setShowForm] = useState<boolean>(false);
+  const [showThemeSettings, setShowThemeSettings] = useState<boolean>(false);
   const [editingPassword, setEditingPassword] = useState<PasswordEntry | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [currentDomain, setCurrentDomain] = useState<string>('');
+  const { isDark } = useTheme();
 
   useEffect(() => {
     loadPasswords();
@@ -135,44 +139,61 @@ export function SidePanel() {
   });
 
   return (
-    <div className="h-full bg-gray-50 flex flex-col">
-      <header className="bg-blue-600 text-white p-4 shadow-md">
-        <h1 className="text-xl font-bold">Password Manager</h1>
-        {currentDomain && (
-          <div className="text-sm mt-1 opacity-90">
-            Current site: {currentDomain}
-            {(() => {
-              const domainCount = passwords.filter(p => 
-                p.website.toLowerCase().includes(currentDomain.toLowerCase())
-              ).length;
-              return domainCount > 0 ? ` (${domainCount} password${domainCount > 1 ? 's' : ''})` : '';
-            })()}
+    <div className="h-full themed-bg-secondary flex flex-col">
+      <header className="themed-accent-bg text-white p-4 shadow-md">
+        <div className="flex justify-between items-center">
+          <div className="flex-1">
+            <h1 className="text-xl font-bold">Password Manager</h1>
+            {currentDomain && (
+              <div className="text-sm mt-1 opacity-90">
+                Current site: {currentDomain}
+                {(() => {
+                  const domainCount = passwords.filter(p => 
+                    p.website.toLowerCase().includes(currentDomain.toLowerCase())
+                  ).length;
+                  return domainCount > 0 ? ` (${domainCount} password${domainCount > 1 ? 's' : ''})` : '';
+                })()}
+              </div>
+            )}
           </div>
-        )}
+          <button
+            onClick={() => setShowThemeSettings(!showThemeSettings)}
+            className="p-2 rounded-lg hover:bg-white hover:bg-opacity-20 transition-colors"
+            title="Theme Settings"
+          >
+            <span className="text-lg">{isDark ? '🌙' : '☀️'}</span>
+          </button>
+        </div>
       </header>
 
-      <div className="p-4 border-b bg-white">
+      {showThemeSettings && (
+        <div className="p-4 themed-bg-primary border-b themed-border">
+          <ThemeSettings onClose={() => setShowThemeSettings(false)} />
+        </div>
+      )}
+
+      <div className="p-4 border-b themed-bg-primary themed-border">
         <input
           type="text"
           placeholder="Search by website or username..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 themed-border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--accent-500)] themed-bg-primary themed-text-primary"
         />
       </div>
 
-      <div className="p-4 border-b bg-white">
+      <div className="p-4 border-b themed-bg-primary themed-border">
         <button
           onClick={() => showForm ? setShowForm(false) : handleShowNewPasswordForm()}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
+          className="w-full themed-accent-bg hover:themed-accent-hover text-white font-medium py-2 px-4 rounded-md transition-colors"
         >
           {showForm ? 'Cancel' : 'Add New Password'}
         </button>
       </div>
 
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 overflow-auto themed-bg-secondary">
         {showForm && (
-          <div className="p-4 bg-white border-b">
+          <div className="p-4 themed-bg-primary border-b themed-border">
             <PasswordForm
               password={editingPassword}
               currentDomain={currentDomain}
@@ -187,7 +208,7 @@ export function SidePanel() {
 
         {isLoading ? (
           <div className="flex items-center justify-center p-8">
-            <div className="text-gray-500">Loading passwords...</div>
+            <div className="themed-text-secondary">Loading passwords...</div>
           </div>
         ) : (
           <PasswordList

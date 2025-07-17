@@ -1,6 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { SidePanel } from '../components/side-panel';
+import { ThemeProvider } from '../contexts/theme-context';
 import '../styles/tailwind.css';
 
 const container = document.getElementById('root');
@@ -11,6 +12,8 @@ if (!container) {
 const root = createRoot(container);
 root.render(
   <StrictMode>
-    <SidePanel />
+    <ThemeProvider>
+      <SidePanel />
+    </ThemeProvider>
   </StrictMode>
 );

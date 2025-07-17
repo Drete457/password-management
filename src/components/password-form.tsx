@@ -52,12 +52,12 @@ export function PasswordForm({ password, currentDomain, onSave, onCancel }: Pass
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <h3 className="text-lg font-medium text-gray-900">
+      <h3 className="text-lg font-medium themed-text-primary">
         {password ? 'Edit Password' : 'New Password'}
       </h3>
 
       <div>
-        <label htmlFor="website" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="website" className="block text-sm font-medium themed-text-primary mb-1">
           Website/Application
         </label>
         <input
@@ -66,13 +66,13 @@ export function PasswordForm({ password, currentDomain, onSave, onCancel }: Pass
           value={website}
           onChange={(e) => setWebsite(e.target.value)}
           placeholder="e.g. gmail.com, facebook.com"
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 themed-border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--accent-500)] themed-bg-primary themed-text-primary"
           required
         />
       </div>
 
       <div>
-        <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="username" className="block text-sm font-medium themed-text-primary mb-1">
           Username/Email
         </label>
         <input
@@ -81,13 +81,13 @@ export function PasswordForm({ password, currentDomain, onSave, onCancel }: Pass
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           placeholder="e.g. your.email@example.com"
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 themed-border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--accent-500)] themed-bg-primary themed-text-primary"
           required
         />
       </div>
 
       <div>
-        <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="password" className="block text-sm font-medium themed-text-primary mb-1">
           Password
         </label>
         <div className="relative">
@@ -97,14 +97,14 @@ export function PasswordForm({ password, currentDomain, onSave, onCancel }: Pass
             value={passwordValue}
             onChange={(e) => setPasswordValue(e.target.value)}
             placeholder="Enter or generate a password"
-            className="w-full px-3 py-2 pr-20 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 pr-20 themed-border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--accent-500)] themed-bg-primary themed-text-primary"
             required
           />
           <div className="absolute inset-y-0 right-0 flex items-center space-x-1 pr-2">
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="text-gray-500 hover:text-gray-700"
+              className="themed-text-secondary hover:themed-text-primary p-1 rounded hover:bg-[var(--bg-tertiary)] transition-colors"
               title={showPassword ? 'Hide password' : 'Show password'}
             >
               {showPassword ? '🙈' : '👁️'}
@@ -112,7 +112,7 @@ export function PasswordForm({ password, currentDomain, onSave, onCancel }: Pass
             <button
               type="button"
               onClick={generatePassword}
-              className="text-blue-600 hover:text-blue-800"
+              className="themed-accent-text hover:text-[var(--accent-600)] p-1 rounded hover:bg-[var(--accent-50)] transition-colors"
               title="Generate random password"
             >
               🎲
@@ -124,14 +124,14 @@ export function PasswordForm({ password, currentDomain, onSave, onCancel }: Pass
       <div className="flex space-x-3 pt-4">
         <button
           type="submit"
-          className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
+          className="flex-1 themed-accent-bg hover:themed-accent-hover text-white font-medium py-2 px-4 rounded-md transition-colors"
         >
           {password ? 'Update' : 'Save'}
         </button>
         <button
           type="button"
           onClick={onCancel}
-          className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 font-medium py-2 px-4 rounded-md transition-colors"
+          className="flex-1 themed-bg-secondary hover:bg-[var(--bg-tertiary)] themed-text-primary font-medium py-2 px-4 rounded-md transition-colors themed-border"
         >
           Cancel
         </button>

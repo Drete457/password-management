@@ -31,7 +31,7 @@ export function PasswordList({ passwords, currentDomain, onEdit, onDelete }: Pas
 
   if (passwords.length === 0) {
     return (
-      <div className="p-8 text-center text-gray-500">
+      <div className="p-8 text-center themed-text-secondary">
         <div className="text-lg mb-2">No passwords found</div>
         <div className="text-sm">Add a new password to get started</div>
       </div>
@@ -49,34 +49,34 @@ export function PasswordList({ passwords, currentDomain, onEdit, onDelete }: Pas
             key={password.id} 
             className={`relative p-4 rounded-lg border-2 hover:shadow-md transition-all duration-200 ${
               isCurrentDomain 
-                ? 'bg-blue-50 border-blue-500 shadow-sm' 
-                : 'bg-white border-gray-200 hover:border-gray-300'
+                ? 'bg-[var(--accent-50)] border-[var(--accent-500)] shadow-sm' 
+                : 'themed-bg-primary themed-border hover:border-[var(--border-secondary)]'
             }`}
           >
             {/* Header with website and actions */}
             <div className="flex justify-between items-start mb-3">
               <div className="min-w-0 flex-1">
                 <div className="flex items-center space-x-2 mb-1">
-                  <h3 className="font-medium text-gray-900 truncate">{password.website}</h3>
+                  <h3 className="font-medium themed-text-primary truncate">{password.website}</h3>
                   {isCurrentDomain && (
-                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 flex-shrink-0">
+                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-[var(--accent-100)] text-[var(--accent-700)] flex-shrink-0">
                       Current Site
                     </span>
                   )}
                 </div>
-                <p className="text-sm text-gray-500 truncate">{password.username}</p>
+                <p className="text-sm themed-text-secondary truncate">{password.username}</p>
               </div>
               <div className="flex space-x-2 flex-shrink-0 ml-2">
                 <button
                   onClick={() => onEdit(password)}
-                  className="text-blue-600 hover:text-blue-800 text-sm p-1 hover:bg-blue-100 rounded"
+                  className="themed-accent-text hover:text-[var(--accent-600)] text-sm p-1 hover:bg-[var(--accent-50)] rounded transition-colors"
                   title="Edit"
                 >
                   ✏️
                 </button>
                 <button
                   onClick={() => onDelete(password.id)}
-                  className="text-red-600 hover:text-red-800 text-sm p-1 hover:bg-red-100 rounded"
+                  className="text-red-600 hover:text-red-800 text-sm p-1 hover:bg-red-50 rounded transition-colors"
                   title="Delete"
                 >
                   🗑️
@@ -87,16 +87,16 @@ export function PasswordList({ passwords, currentDomain, onEdit, onDelete }: Pas
             {/* Username section */}
             <div className="mb-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-600 uppercase tracking-wide">Username</span>
+                <span className="text-xs themed-text-secondary uppercase tracking-wide">Username</span>
                 <button
                   onClick={() => copyToClipboard(password.username)}
-                  className="text-blue-600 hover:text-blue-800 text-sm p-1 hover:bg-blue-100 rounded"
+                  className="themed-accent-text hover:text-[var(--accent-600)] text-sm p-1 hover:bg-[var(--accent-50)] rounded transition-colors"
                   title="Copy username"
                 >
                   📋
                 </button>
               </div>
-              <div className="text-sm text-gray-900 truncate mt-1 font-mono">
+              <div className="text-sm themed-text-primary truncate mt-1 font-mono">
                 {password.username}
               </div>
             </div>
@@ -104,31 +104,31 @@ export function PasswordList({ passwords, currentDomain, onEdit, onDelete }: Pas
             {/* Password section */}
             <div className="mb-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-600 uppercase tracking-wide">Password</span>
+                <span className="text-xs themed-text-secondary uppercase tracking-wide">Password</span>
                 <div className="flex space-x-1">
                   <button
                     onClick={() => togglePasswordVisibility(password.id)}
-                    className="text-gray-500 hover:text-gray-700 text-sm p-1 hover:bg-gray-100 rounded"
+                    className="themed-text-secondary hover:themed-text-primary text-sm p-1 hover:bg-[var(--bg-tertiary)] rounded transition-colors"
                     title={visiblePasswords.has(password.id) ? 'Hide password' : 'Show password'}
                   >
                     {visiblePasswords.has(password.id) ? '🙈' : '👁️'}
                   </button>
                   <button
                     onClick={() => copyToClipboard(password.password)}
-                    className="text-blue-600 hover:text-blue-800 text-sm p-1 hover:bg-blue-100 rounded"
+                    className="themed-accent-text hover:text-[var(--accent-600)] text-sm p-1 hover:bg-[var(--accent-50)] rounded transition-colors"
                     title="Copy password"
                   >
                     📋
                   </button>
                 </div>
               </div>
-              <div className="text-sm font-mono truncate mt-1 text-gray-900">
+              <div className="text-sm font-mono truncate mt-1 themed-text-primary">
                 {visiblePasswords.has(password.id) ? password.password : '••••••••••••'}
               </div>
             </div>
 
             {/* Footer with date */}
-            <div className="text-xs text-gray-400 border-t border-gray-200 pt-2">
+            <div className="text-xs themed-text-tertiary border-t themed-border pt-2">
               Updated: {password.updatedAt.toLocaleDateString('en-US')}
             </div>
           </div>
