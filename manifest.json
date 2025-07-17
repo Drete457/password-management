@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "Password Manager",
+  "description": "A password manager extension for secure storage and retrieval of passwords.",
+  "version": "0.0.1",
+  "host_permissions": [
+    "<all_urls>"
+  ],  
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "ruleset_csp_removal",
+        "enabled": true,
+        "path": "src/rules/rules_csp.json"
+      }
+    ]
+  }
+}
