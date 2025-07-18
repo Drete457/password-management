@@ -248,6 +248,61 @@
   .themed-accent-text {
     color: var(--accent-500);
   }
+
+  /* Checkbox Styles */
+  .themed-checkbox {
+    @apply w-4 h-4 rounded border-2 border-[var(--border-primary)];
+    @apply bg-[var(--bg-primary)] text-[var(--accent-500)];
+    @apply focus:ring-2 focus:ring-[var(--accent-500)] focus:ring-opacity-50;
+    @apply checked:bg-[var(--accent-500)] checked:border-[var(--accent-500)];
+  }
+
+  /* Slider Styles */
+  .themed-slider {
+    @apply w-full h-2 rounded-lg appearance-none cursor-pointer;
+    @apply bg-[var(--bg-secondary)] border border-[var(--border-primary)];
+  }
+
+  .themed-slider::-webkit-slider-thumb {
+    @apply appearance-none w-4 h-4 rounded-full;
+    @apply bg-[var(--accent-500)] border-2 border-white;
+    @apply shadow-md cursor-pointer;
+  }
+
+  .themed-slider::-moz-range-thumb {
+    @apply w-4 h-4 rounded-full;
+    @apply bg-[var(--accent-500)] border-2 border-white;
+    @apply shadow-md cursor-pointer border-none;
+  }
+
+  /* Backup Component Styles */
+  .backup-history-item {
+    @apply flex items-center justify-between p-3 rounded-lg;
+    @apply bg-[var(--bg-secondary)] border border-[var(--border-primary)];
+    @apply hover:bg-[var(--bg-tertiary)] transition-colors;
+  }
+
+  .backup-action-btn {
+    @apply px-3 py-1 rounded text-xs font-medium transition-colors;
+  }
+
+  .backup-restore-btn {
+    @apply bg-[var(--accent-500)] hover:bg-[var(--accent-600)] text-white;
+  }
+
+  .backup-delete-btn {
+    @apply bg-red-600 hover:bg-red-700 text-white;
+  }
+
+  /* Enhanced Password Card Styles */
+  .password-card-encrypted {
+    @apply border-l-4 border-l-green-500;
+  }
+
+  .password-card-encrypted::before {
+    content: "🔒";
+    @apply absolute top-2 right-2 text-green-500 text-sm;
+  }
 }
 
 body {

@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { filePasswordService } from '../services/file-password-service';
+import { backupPasswordService } from '../services/backup-service';
+import { BackupSettings } from './backup-settings';
 
 interface FileManagerProps {
   onImportComplete: () => void;
@@ -10,11 +11,16 @@ export function FileManager({ onImportComplete, onClose }: FileManagerProps) {
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [importError, setImportError] = useState<string>('');
+  const [showBackupSettings, setShowBackupSettings] = useState(false);
+  const [encryptionPassword, setEncryptionPassword] = useState('');
+  const [showEncryptionInput, setShowEncryptionInput] = useState(false);
 
   const handleExport = async () => {
     try {
       setIsExporting(true);
-      await filePasswordService.exportToFile();
+      await backupPasswordService.exportToFile(encryptionPassword || undefined);
+      setEncryptionPassword('');
+      setShowEncryptionInput(false);
     } catch (error) {
       console.error('Export failed:', error);
       alert('Failed to export passwords. Please try again.');
@@ -31,9 +37,11 @@ export function FileManager({ onImportComplete, onClose }: FileManagerProps) {
       setIsImporting(true);
       setImportError('');
       
-      await filePasswordService.importFromFile(file);
+      await backupPasswordService.importFromFile(file, encryptionPassword || undefined);
       onImportComplete();
       alert('Passwords imported successfully!');
+      setEncryptionPassword('');
+      setShowEncryptionInput(false);
       onClose();
     } catch (error) {
       console.error('Import failed:', error);
@@ -45,29 +53,17 @@ export function FileManager({ onImportComplete, onClose }: FileManagerProps) {
     }
   };
 
-  const handleClearAll = async () => {
-    const confirmed = confirm(
-      'Are you sure you want to clear all passwords? This action cannot be undone.'
+  if (showBackupSettings) {
+    return (
+      <BackupSettings onClose={() => setShowBackupSettings(false)} />
     );
-    
-    if (confirmed) {
-      try {
-        await filePasswordService.clearAll();
-        onImportComplete();
-        alert('All passwords cleared successfully!');
-        onClose();
-      } catch (error) {
-        console.error('Clear failed:', error);
-        alert('Failed to clear passwords. Please try again.');
-      }
-    }
-  };
+  }
 
   return (
     <div className="theme-settings-container">
       <div className="theme-settings-header">
         <h3 className="theme-settings-title">
-          File Management
+          Backup & File Management
         </h3>
         <button
           onClick={onClose}
@@ -79,36 +75,70 @@ export function FileManager({ onImportComplete, onClose }: FileManagerProps) {
       </div>
 
       <div className="theme-settings-content">
-        {/* Export Section */}
+        {/* Backup Settings Button */}
         <div className="theme-settings-section">
-          <h4 className="theme-settings-section-title">Export Passwords</h4>
-          <p className="text-sm themed-text-secondary mb-3">
-            Download all your passwords as a JSON file for backup or transfer.
-          </p>
           <button
-            onClick={handleExport}
-            disabled={isExporting}
-            className="w-full flex items-center justify-center space-x-2 p-3 rounded-lg themed-accent-bg hover:themed-accent-hover text-white transition-colors disabled:opacity-50"
+            onClick={() => setShowBackupSettings(true)}
+            className="w-full flex items-center justify-center space-x-2 p-3 rounded-lg themed-accent-bg hover:themed-accent-hover text-white transition-colors"
           >
-            {isExporting ? (
-              <>
-                <span className="theme-reset-spinner">⟳</span>
-                <span>Exporting...</span>
-              </>
-            ) : (
-              <>
-                <span>📥</span>
-                <span>Export to File</span>
-              </>
-            )}
+            <span>⚙️</span>
+            <span>Backup Settings & Auto Backup</span>
           </button>
         </div>
 
-        {/* Import Section */}
+        {/* Quick Export Section */}
         <div className="theme-settings-section">
-          <h4 className="theme-settings-section-title">Import Passwords</h4>
+          <h4 className="theme-settings-section-title">📥 Quick Export</h4>
           <p className="text-sm themed-text-secondary mb-3">
-            Upload a JSON file to import passwords. This will replace all current passwords.
+            Download all your passwords as a backup file.
+          </p>
+          
+          <div className="space-y-3">
+            <label className="flex items-center space-x-3">
+              <input
+                type="checkbox"
+                checked={showEncryptionInput}
+                onChange={(e) => setShowEncryptionInput(e.target.checked)}
+                className="themed-checkbox"
+              />
+              <span className="text-sm themed-text-primary">Encrypt/Decrypt with password</span>
+            </label>
+            
+            {showEncryptionInput && (
+              <input
+                type="password"
+                placeholder="Enter encryption/decryption password"
+                value={encryptionPassword}
+                onChange={(e) => setEncryptionPassword(e.target.value)}
+                className="w-full p-2 text-sm themed-border rounded-lg themed-bg-primary themed-text-primary"
+              />
+            )}
+            
+            <button
+              onClick={handleExport}
+              disabled={isExporting}
+              className="w-full flex items-center justify-center space-x-2 p-3 rounded-lg themed-accent-bg hover:themed-accent-hover text-white transition-colors disabled:opacity-50"
+            >
+              {isExporting ? (
+                <>
+                  <span className="theme-reset-spinner">⟳</span>
+                  <span>Exporting...</span>
+                </>
+              ) : (
+                <>
+                  <span>📥</span>
+                  <span>Export {showEncryptionInput ? 'Encrypted ' : ''}Backup</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Quick Import Section */}
+        <div className="theme-settings-section">
+          <h4 className="theme-settings-section-title">📤 Quick Import</h4>
+          <p className="text-sm themed-text-secondary mb-3">
+            Upload a backup file to restore passwords. This will replace all current passwords.
           </p>
           
           {importError && (
@@ -117,7 +147,16 @@ export function FileManager({ onImportComplete, onClose }: FileManagerProps) {
             </div>
           )}
 
-          <div className="space-y-2">
+          <div className="space-y-3">
+            {!showEncryptionInput && (
+              <button
+                onClick={() => setShowEncryptionInput(true)}
+                className="text-sm themed-accent-text hover:underline"
+              >
+                File encrypted? Set password
+              </button>
+            )}
+            
             <input
               type="file"
               accept=".json"
@@ -135,30 +174,16 @@ export function FileManager({ onImportComplete, onClose }: FileManagerProps) {
           </div>
         </div>
 
-        {/* Clear Section */}
-        <div className="theme-settings-section">
-          <h4 className="theme-settings-section-title">Clear All Data</h4>
-          <p className="text-sm themed-text-secondary mb-3">
-            Remove all passwords from storage. This action cannot be undone.
-          </p>
-          <button
-            onClick={handleClearAll}
-            className="w-full flex items-center justify-center space-x-2 p-3 rounded-lg bg-red-600 hover:bg-red-700 text-white transition-colors"
-          >
-            <span>🗑️</span>
-            <span>Clear All Passwords</span>
-          </button>
-        </div>
-
         {/* Info Section */}
         <div className="theme-settings-section">
           <div className="p-3 rounded-lg themed-bg-secondary themed-border">
-            <h4 className="text-sm font-medium themed-text-primary mb-2">💡 File Storage Info</h4>
+            <h4 className="text-sm font-medium themed-text-primary mb-2">💡 Backup Features</h4>
             <ul className="text-xs themed-text-secondary space-y-1">
-              <li>• Files are stored locally in Chrome storage</li>
-              <li>• Export creates a downloadable JSON backup</li>
-              <li>• Import replaces all current passwords</li>
-              <li>• Always backup before making changes</li>
+              <li>• 🔄 <strong>Auto Backup:</strong> Automatic periodic backups</li>
+              <li>• 🔒 <strong>Encryption:</strong> AES-256 password protection</li>
+              <li>• 📋 <strong>History:</strong> Keep multiple backup versions</li>
+              <li>• 💾 <strong>Export:</strong> Create downloadable backup files</li>
+              <li>• 📤 <strong>Import:</strong> Restore from backup files</li>
             </ul>
           </div>
         </div>
