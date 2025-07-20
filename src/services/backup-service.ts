@@ -93,6 +93,15 @@ class BackupPasswordService implements BackupService {
         throw new Error('Invalid backup file format');
       }
 
+      // Check if vault is locked and throw error if needed
+      const { securityService } = await import('./master-password-service');
+      const hasMasterPassword = await securityService.hasMasterPassword();
+      
+      // Only check if vault is locked when there's a master password configured
+      if (hasMasterPassword && securityService.isLocked()) {
+        throw new Error('Vault is locked. Please unlock the vault before importing passwords.');
+      }
+
       // Convert back to PasswordEntry objects
       const passwords: PasswordEntry[] = parsedData.passwords.map((entry: any) => ({
         id: entry.id,
@@ -104,11 +113,15 @@ class BackupPasswordService implements BackupService {
       }));
 
       // Clear existing passwords and import new ones
+      console.log('Starting import process...');
       const currentPasswords = await passwordService.getAll();
+      console.log(`Found ${currentPasswords.length} existing passwords to clear`);
+      
       for (const password of currentPasswords) {
         await passwordService.delete(password.id);
       }
 
+      console.log(`Importing ${passwords.length} new passwords...`);
       for (const password of passwords) {
         await passwordService.add({
           website: password.website,
@@ -116,10 +129,12 @@ class BackupPasswordService implements BackupService {
           password: password.password
         });
       }
+      
+      console.log('Import completed successfully');
 
     } catch (error) {
       console.error('Failed to import data:', error);
-      throw new Error('Failed to import backup data');
+      throw error instanceof Error ? error : new Error('Failed to import backup data');
     }
   }
 

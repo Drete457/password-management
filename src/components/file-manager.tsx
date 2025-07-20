@@ -45,11 +45,19 @@ export function FileManager({ onImportComplete, onClose }: FileManagerProps) {
       onClose();
     } catch (error) {
       console.error('Import failed:', error);
-      setImportError(error instanceof Error ? error.message : 'Import failed');
+      const errorMessage = error instanceof Error ? error.message : 'Import failed';
+      setImportError(errorMessage);
+      
+      // Don't close on error so user can see the error message
+      if (errorMessage.includes('Vault is locked')) {
+        alert('Cannot import: Vault is locked. Please unlock the vault first and try again.');
+      }
     } finally {
       setIsImporting(false);
       // Reset file input
-      event.target.value = '';
+      if (event.target) {
+        (event.target as HTMLInputElement).value = '';
+      }
     }
   };
 
