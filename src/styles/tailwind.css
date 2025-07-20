@@ -237,6 +237,22 @@
     border-color: var(--border-primary);
   }
 
+  .themed-input {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    border-color: var(--border-primary);
+  }
+
+  .themed-input::placeholder {
+    color: var(--text-tertiary);
+  }
+
+  .themed-input:focus {
+    outline: none;
+    border-color: var(--accent-500);
+    box-shadow: 0 0 0 3px rgba(var(--accent-500), 0.1);
+  }
+
   .themed-accent-bg {
     background-color: var(--accent-500);
   }

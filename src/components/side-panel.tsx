@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { PasswordEntry } from '../types/password';
 import { passwordService } from '../services/password-service';
+import { securityService } from '../services/master-password-service';
 import { PasswordList } from './password-list';
 import { PasswordForm } from './password-form';
 import { ThemeSettings } from './theme-settings';
 import { FileManager } from './file-manager';
 import { PasswordHealthDashboard } from './password-health-dashboard';
+import { MasterPasswordSetup, MasterPasswordUnlock } from './master-password';
 import { useTheme } from '../contexts/theme-context';
 
 export function SidePanel() {
@@ -18,9 +20,15 @@ export function SidePanel() {
   const [editingPassword, setEditingPassword] = useState<PasswordEntry | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [currentDomain, setCurrentDomain] = useState<string>('');
+  const [showMasterPasswordSetup, setShowMasterPasswordSetup] = useState<boolean>(false);
+  const [showMasterPasswordUnlock, setShowMasterPasswordUnlock] = useState<boolean>(false);
+  const [isVaultLocked, setIsVaultLocked] = useState<boolean>(false);
+  const [hasMasterPassword, setHasMasterPassword] = useState<boolean>(false);
+  const [isInitialized, setIsInitialized] = useState<boolean>(false);
   const { isDark } = useTheme();
 
   useEffect(() => {
+    initializeSecurity();
     loadPasswords();
     getCurrentDomain();
 
@@ -49,6 +57,26 @@ export function SidePanel() {
     };
   }, []);
 
+  const initializeSecurity = async () => {
+    try {
+      const hasMP = await securityService.hasMasterPassword();
+      const isLocked = securityService.isLocked();
+      
+      setHasMasterPassword(hasMP);
+      setIsVaultLocked(isLocked);
+      
+      // Only show unlock if has master password AND is locked AND it's the first initialization
+      if (hasMP && isLocked && !isInitialized) {
+        setShowMasterPasswordUnlock(true);
+      }
+      
+      setIsInitialized(true);
+      // Removed: don't show setup automatically
+    } catch (error) {
+      console.error('Error initializing security:', error);
+    }
+  };
+
   const getCurrentDomain = async () => {
     try {
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -65,10 +93,18 @@ export function SidePanel() {
   const loadPasswords = async () => {
     try {
       setIsLoading(true);
+      
+      // Don't load passwords if vault is locked
+      if (securityService.isLocked()) {
+        setPasswords([]);
+        return;
+      }
+      
       const allPasswords = await passwordService.getAll();
       setPasswords(allPasswords);
     } catch (error) {
       console.error('Error loading passwords:', error);
+      setPasswords([]);
     } finally {
       setIsLoading(false);
     }
@@ -121,6 +157,27 @@ export function SidePanel() {
     setShowForm(false);
   };
 
+  const handleSecurityIconClick = async () => {
+    const hasMP = await securityService.hasMasterPassword();
+    
+    if (!hasMP) {
+      // No master password configured, show setup
+      setShowMasterPasswordSetup(true);
+    } else if (securityService.isLocked()) {
+      // Has master password but is locked, show unlock
+      setShowMasterPasswordUnlock(true);
+    } else {
+      // Is unlocked, lock (without showing modal)
+      securityService.lockVault();
+      setIsVaultLocked(true);
+      setShowMasterPasswordUnlock(false);
+      // Clear any open forms and data when locking
+      setShowForm(false);
+      setEditingPassword(null);
+      setPasswords([]);
+    }
+  };
+
   const filteredPasswords = passwords.filter(password =>
     password.website.toLowerCase().includes(searchTerm.toLowerCase()) ||
     password.username.toLowerCase().includes(searchTerm.toLowerCase())
@@ -163,17 +220,42 @@ export function SidePanel() {
           <div className="flex space-x-2">
             <button
               onClick={() => setShowHealthDashboard(!showHealthDashboard)}
-              className="p-2 rounded-lg hover:bg-white hover:bg-opacity-20 transition-colors"
-              title="Password Health Dashboard"
+              disabled={isVaultLocked}
+              className={`p-2 rounded-lg transition-colors ${
+                isVaultLocked 
+                  ? 'opacity-50 cursor-not-allowed' 
+                  : 'hover:bg-white hover:bg-opacity-20'
+              }`}
+              title={isVaultLocked ? "Unlock vault to access" : "Password Health Dashboard"}
             >
               <span className="text-lg">📊</span>
             </button>
             <button
               onClick={() => setShowFileManager(!showFileManager)}
-              className="p-2 rounded-lg hover:bg-white hover:bg-opacity-20 transition-colors"
-              title="File Manager"
+              disabled={isVaultLocked}
+              className={`p-2 rounded-lg transition-colors ${
+                isVaultLocked 
+                  ? 'opacity-50 cursor-not-allowed' 
+                  : 'hover:bg-white hover:bg-opacity-20'
+              }`}
+              title={isVaultLocked ? "Unlock vault to access" : "File Manager"}
             >
               <span className="text-lg">📁</span>
+            </button>
+            <button
+              onClick={handleSecurityIconClick}
+              className="p-2 rounded-lg hover:bg-white hover:bg-opacity-20 transition-colors"
+              title={
+                !hasMasterPassword 
+                  ? "Setup Master Password" 
+                  : isVaultLocked 
+                    ? "Unlock Vault" 
+                    : "Lock Vault"
+              }
+            >
+              <span className="text-lg">
+                {!hasMasterPassword ? "🔐" : isVaultLocked ? "🔒" : "🔓"}
+              </span>
             </button>
             <button
               onClick={() => setShowThemeSettings(!showThemeSettings)}
@@ -220,24 +302,39 @@ export function SidePanel() {
       <div className="p-4 border-b themed-bg-primary themed-border">
         <input
           type="text"
-          placeholder="Search by website or username..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full px-3 py-2 themed-border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--accent-500)] themed-bg-primary themed-text-primary"
+          placeholder={isVaultLocked ? "Unlock vault to search..." : "Search by website or username..."}
+          value={isVaultLocked ? "" : searchTerm}
+          onChange={(e) => !isVaultLocked && setSearchTerm(e.target.value)}
+          disabled={isVaultLocked}
+          className={`w-full px-3 py-2 themed-border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--accent-500)] themed-bg-primary themed-text-primary ${
+            isVaultLocked ? 'opacity-50 cursor-not-allowed' : ''
+          }`}
         />
       </div>
 
       <div className="p-4 border-b themed-bg-primary themed-border">
         <button
           onClick={() => showForm ? setShowForm(false) : handleShowNewPasswordForm()}
-          className="w-full themed-accent-bg hover:themed-accent-hover text-white font-medium py-2 px-4 rounded-md transition-colors"
+          disabled={isVaultLocked}
+          className={`w-full font-medium py-2 px-4 rounded-md transition-colors ${
+            isVaultLocked 
+              ? 'bg-gray-400 text-gray-600 cursor-not-allowed' 
+              : 'themed-accent-bg hover:themed-accent-hover text-white'
+          }`}
         >
-          {showForm ? 'Cancel' : 'Add New Password'}
+          {isVaultLocked ? 'Vault Locked' : showForm ? 'Cancel' : 'Add New Password'}
         </button>
       </div>
 
       <main className="flex-1 overflow-auto themed-bg-secondary">
-        {showForm && (
+        {isVaultLocked ? (
+          <div className="flex items-center justify-center p-8 text-center">
+            <div className="themed-text-secondary">
+              <div className="text-lg mb-2">🔒 Vault is Locked</div>
+              <div className="text-sm">Please unlock the vault to access your passwords</div>
+            </div>
+          </div>
+        ) : showForm ? (
           <div className="p-4 themed-bg-primary border-b themed-border">
             <PasswordForm
               password={editingPassword}
@@ -249,9 +346,7 @@ export function SidePanel() {
               onCancel={handleCancelEdit}
             />
           </div>
-        )}
-
-        {isLoading ? (
+        ) : isLoading ? (
           <div className="flex items-center justify-center p-8">
             <div className="themed-text-secondary">Loading passwords...</div>
           </div>
@@ -264,6 +359,34 @@ export function SidePanel() {
           />
         )}
       </main>
+
+      {/* Master Password Modals */}
+      {showMasterPasswordSetup && (
+        <MasterPasswordSetup
+          onComplete={async () => {
+            setShowMasterPasswordSetup(false);
+            setIsVaultLocked(false);
+            setHasMasterPassword(true);
+            loadPasswords();
+          }}
+          onClose={() => {
+            setShowMasterPasswordSetup(false);
+          }}
+        />
+      )}
+
+      {showMasterPasswordUnlock && (
+        <MasterPasswordUnlock
+          onUnlock={() => {
+            setShowMasterPasswordUnlock(false);
+            setIsVaultLocked(false);
+            loadPasswords();
+          }}
+          onClose={() => {
+            setShowMasterPasswordUnlock(false);
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -1,8 +1,9 @@
 import { PasswordEntry, PasswordDatabase } from '../types/password';
+import { securityService } from './master-password-service';
 
 class IndexedDBPasswordService implements PasswordDatabase {
   private dbName = 'PasswordManagerDB';
-  private version = 1;
+  private version = 2;
   private storeName = 'passwords';
 
   private async openDatabase(): Promise<IDBDatabase> {
@@ -32,6 +33,45 @@ class IndexedDBPasswordService implements PasswordDatabase {
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
   }
 
+  /**
+   * Encripta dados sensíveis se o master password estiver configurado
+   */
+  private encryptSensitiveData(entry: PasswordEntry): PasswordEntry {
+    if (!securityService.isLocked()) {
+      try {
+        return {
+          ...entry,
+          password: securityService.encryptData(entry.password),
+          username: securityService.encryptData(entry.username)
+        };
+      } catch (error) {
+        console.warn('Failed to encrypt data, storing unencrypted:', error);
+      }
+    }
+    return entry;
+  }
+
+  /**
+   * Decripta dados sensíveis se estiverem encriptados
+   */
+  private decryptSensitiveData(entry: PasswordEntry): PasswordEntry {
+    if (!securityService.isLocked()) {
+      try {
+        const decryptedPassword = securityService.decryptData(entry.password);
+        const decryptedUsername = securityService.decryptData(entry.username);
+        
+        return {
+          ...entry,
+          password: decryptedPassword || entry.password,
+          username: decryptedUsername || entry.username
+        };
+      } catch (error) {
+        console.warn('Failed to decrypt data, returning as is:', error);
+      }
+    }
+    return entry;
+  }
+
   async getAll(): Promise<PasswordEntry[]> {
     const db = await this.openDatabase();
     return new Promise((resolve, reject) => {
@@ -40,11 +80,16 @@ class IndexedDBPasswordService implements PasswordDatabase {
       const request = store.getAll();
 
       request.onsuccess = () => {
-        const entries = request.result.map(entry => ({
-          ...entry,
-          createdAt: new Date(entry.createdAt),
-          updatedAt: new Date(entry.updatedAt)
-        }));
+        const entries = request.result.map(entry => {
+          const parsedEntry = {
+            ...entry,
+            createdAt: new Date(entry.createdAt),
+            updatedAt: new Date(entry.updatedAt)
+          };
+          
+          // Tenta decriptar se não estiver bloqueado
+          return this.decryptSensitiveData(parsedEntry);
+        });
         resolve(entries);
       };
 
@@ -64,11 +109,12 @@ class IndexedDBPasswordService implements PasswordDatabase {
       request.onsuccess = () => {
         const entry = request.result;
         if (entry) {
-          resolve({
+          const parsedEntry = {
             ...entry,
             createdAt: new Date(entry.createdAt),
             updatedAt: new Date(entry.updatedAt)
-          });
+          };
+          resolve(this.decryptSensitiveData(parsedEntry));
         } else {
           resolve(undefined);
         }
@@ -92,10 +138,13 @@ class IndexedDBPasswordService implements PasswordDatabase {
       updatedAt: now
     };
 
+    // Encripta dados sensíveis antes de salvar
+    const encryptedEntry = this.encryptSensitiveData(newEntry);
+
     return new Promise((resolve, reject) => {
       const transaction = db.transaction([this.storeName], 'readwrite');
       const store = transaction.objectStore(this.storeName);
-      const request = store.add(newEntry);
+      const request = store.add(encryptedEntry);
 
       request.onsuccess = () => {
         resolve(id);
@@ -122,10 +171,13 @@ class IndexedDBPasswordService implements PasswordDatabase {
       updatedAt: new Date()
     };
 
+    // Encripta dados sensíveis antes de salvar
+    const encryptedEntry = this.encryptSensitiveData(updatedEntry);
+
     return new Promise((resolve, reject) => {
       const transaction = db.transaction([this.storeName], 'readwrite');
       const store = transaction.objectStore(this.storeName);
-      const request = store.put(updatedEntry);
+      const request = store.put(encryptedEntry);
 
       request.onsuccess = () => {
         resolve();

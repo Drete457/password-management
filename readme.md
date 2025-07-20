@@ -1,6 +1,6 @@
 # Password Manager - Chrome Extension
 
-A password manager Chrome extension that allows you to securely store, view, edit, and organize your credentials using IndexedDB.
+A password manager Chrome extension that allows you to securely store, view, edit, and organize your credentials using IndexedDB with advanced security features.
 
 ## Features
 
@@ -11,6 +11,33 @@ A password manager Chrome extension that allows you to securely store, view, edi
 - ✅ **Copy Credentials**: Buttons to copy username and password
 - ✅ **Show/Hide Passwords**: Password visibility control
 - ✅ **Smart Search**: Filter by website or username
+- ✅ **Master Password**: Optional encryption layer for maximum security
+- ✅ **Password Health Dashboard**: Analyze weak, duplicate, and old passwords
+- ✅ **Password Strength Indicator**: Real-time feedback on password quality
+- ✅ **Auto-lock**: Automatic vault locking after inactivity
+- ✅ **Backup & Export**: Encrypted backup system for data protection
+
+## Security Features
+
+### Master Password Protection
+- **AES-256 Encryption**: All passwords encrypted with master password
+- **PBKDF2 Key Derivation**: 10,000 iterations for secure key generation
+- **Auto-lock Timer**: Vault locks automatically after 15 minutes of inactivity
+- **Activity Detection**: Resets timer on user interaction
+- **Memory Protection**: Encryption keys cleared when locked
+
+### Password Analysis
+- **Strength Scoring**: 5-point rating system for password quality
+- **Duplicate Detection**: Identifies reused passwords across accounts
+- **Age Monitoring**: Tracks when passwords were created/updated
+- **Security Recommendations**: Actionable advice for improving security
+- **Health Dashboard**: Visual overview of password security status
+
+### Data Protection
+- **Local Encryption**: Data encrypted before storage in IndexedDB
+- **Extension Isolation**: Secure storage isolated from other extensions
+- **No External Servers**: All data stays on your device
+- **Integrity Validation**: Tamper detection and data verification
 
 ## How to Use
 
@@ -24,11 +51,28 @@ A password manager Chrome extension that allows you to securely store, view, edi
 
 ### Using the Extension
 1. **Open Manager**: Click the extension icon in the toolbar
-2. **Add Password**: Click "Add New Password" and fill in the data
-3. **Search**: Use the search bar to find specific passwords
-4. **Edit**: Click the pencil icon ✏️ to edit an entry
-5. **Copy**: Click the copy buttons to use credentials
-6. **Delete**: Click the trash icon 🗑️ to remove an entry
+2. **Set Master Password**: Choose a strong master password on first use
+3. **Add Password**: Click "Add New Password" and fill in the data
+4. **Search**: Use the search bar to find specific passwords
+5. **Edit**: Click the pencil icon ✏️ to edit an entry
+6. **Copy**: Click the copy buttons to use credentials
+7. **Delete**: Click the trash icon 🗑️ to remove an entry
+8. **Lock Vault**: Click the lock icon 🔒 to secure your data
+9. **Health Check**: Click the chart icon 📊 to analyze password security
+
+### Master Password Setup
+1. **First Time**: Set up a master password when prompted
+2. **Requirements**: Minimum 8 characters with mixed case, numbers, and symbols
+3. **Strength Indicator**: Real-time feedback ensures strong password choice
+4. **Remember**: Master password cannot be recovered if forgotten
+5. **Auto-lock**: Vault locks after 15 minutes of inactivity
+
+### Password Health Dashboard
+1. **Overview Tab**: General statistics and security score
+2. **Weak Passwords**: List of passwords needing improvement
+3. **Duplicates**: Find and fix reused passwords
+4. **Old Passwords**: Identify passwords that need updating
+5. **Analytics**: Visual charts showing security trends
 
 ### Security Features
 - **Local Storage**: Data stays only on your computer
@@ -81,19 +125,32 @@ npm run lint
 
 ## Security and Privacy
 
-This extension was designed with privacy focus:
+This extension was designed with security and privacy as top priorities:
 - **No data collection**: No information is sent to external servers
+- **Master password encryption**: All sensitive data encrypted with AES-256
 - **Local storage**: All data stays in your browser's IndexedDB
+- **Extension isolation**: Data cannot be accessed by other extensions
+- **Auto-lock protection**: Vault automatically locks after inactivity
+- **Memory safety**: Encryption keys cleared when locked
 - **Open source**: You can review all source code
 - **No analytics**: No tracking or telemetry
+
+## Important Security Notes
+
+- **Master Password**: Choose a strong, memorable master password - it cannot be recovered
+- **Regular Updates**: Update old passwords identified by the health dashboard
+- **Unique Passwords**: Avoid reusing passwords across different accounts
+- **Backup**: Export encrypted backups regularly for data safety
+- **Device Security**: Ensure your computer is secure and up-to-date
 
 ## Limitations
 
 - Data is specific to Chrome profile and computer
-- No cross-device synchronization
+- Master password cannot be recovered if forgotten
+- No cross-device synchronization (by design for security)
 - Manual backup needed for data migration
 - Dependent on Chrome/Chromium browser
 
 ---
 
-**Important**: This extension stores passwords locally. We recommend regular data backups and using strong master passwords for your computer.
+**Important**: This extension stores passwords with optional master password encryption. For maximum security, always use the master password feature and keep your computer secure.
