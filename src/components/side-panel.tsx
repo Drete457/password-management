@@ -163,14 +163,14 @@ export function SidePanel() {
     if (!hasMP) {
       // No master password configured, show setup
       setShowMasterPasswordSetup(true);
-    } else if (securityService.isLocked()) {
+    } else if (isVaultLocked && securityService.isLocked()) {
       // Has master password but is locked, show unlock
       setShowMasterPasswordUnlock(true);
     } else {
       // Is unlocked, lock (without showing modal)
       securityService.lockVault();
       setIsVaultLocked(true);
-      setShowMasterPasswordUnlock(false);
+  
       // Clear any open forms and data when locking
       setShowForm(false);
       setEditingPassword(null);
