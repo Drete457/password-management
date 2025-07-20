@@ -47,7 +47,7 @@ export function SidePanel() {
 
     // Add tab activation listener
     chrome.tabs.onActivated.addListener(handleTabChange);
-    
+
     // Add tab update listener for URL changes within the same tab
     chrome.tabs.onUpdated.addListener(handleTabUpdate);
 
@@ -61,16 +61,18 @@ export function SidePanel() {
   const initializeSecurity = async () => {
     try {
       const hasMP = await securityService.hasMasterPassword();
-      const isLocked = securityService.isLocked();
-      
-      setHasMasterPassword(hasMP);
-      setIsVaultLocked(isLocked);
-      
-      // Only show unlock if has master password AND is locked AND it's the first initialization
-      if (hasMP && isLocked && !isInitialized) {
-        setShowMasterPasswordUnlock(true);
+
+      if (hasMP) {
+        const isLocked = securityService.isLocked();
+        setHasMasterPassword(hasMP);
+        setIsVaultLocked(isLocked);
+
+        // Only show unlock if has master password AND is locked AND it's the first initialization
+        if (hasMP && isLocked && !isInitialized) {
+          setShowMasterPasswordUnlock(true);
+        }
       }
-      
+
       setIsInitialized(true);
       // Removed: don't show setup automatically
     } catch (error) {
@@ -94,13 +96,13 @@ export function SidePanel() {
   const loadPasswords = async () => {
     try {
       setIsLoading(true);
-      
+
       // Don't load passwords if vault is locked
       if (securityService.isLocked()) {
         setPasswords([]);
         return;
       }
-      
+
       const allPasswords = await passwordService.getAll();
       setPasswords(allPasswords);
     } catch (error) {
@@ -160,7 +162,7 @@ export function SidePanel() {
 
   const handleSecurityIconClick = async () => {
     const hasMP = await securityService.hasMasterPassword();
-    
+
     if (!hasMP) {
       // No master password configured, show setup
       setShowMasterPasswordSetup(true);
@@ -171,12 +173,29 @@ export function SidePanel() {
       // Is unlocked, lock (without showing modal)
       securityService.lockVault();
       setIsVaultLocked(true);
-  
+
       // Clear any open forms and data when locking
       setShowForm(false);
       setEditingPassword(null);
       setPasswords([]);
     }
+  };
+
+  const handleVaultReset = () => {
+    // Reset all states to initial values
+    setPasswords([]);
+    setHasMasterPassword(false);
+    setIsVaultLocked(false);
+    setShowMasterPasswordSetup(false);
+    setShowMasterPasswordUnlock(false);
+    setShowMasterPasswordChange(false);
+    setShowForm(false);
+    setEditingPassword(null);
+    setSearchTerm('');
+    setIsInitialized(false);
+
+    // Reinitialize the security system
+    initializeSecurity();
   };
 
   const filteredPasswords = passwords.filter(password =>
@@ -190,12 +209,12 @@ export function SidePanel() {
     if (currentDomain) {
       const aMatchesDomain = a.website.toLowerCase().includes(currentDomain.toLowerCase());
       const bMatchesDomain = b.website.toLowerCase().includes(currentDomain.toLowerCase());
-      
+
       // If one matches current domain and other doesn't, prioritize the match
       if (aMatchesDomain && !bMatchesDomain) return -1;
       if (!aMatchesDomain && bMatchesDomain) return 1;
     }
-    
+
     // For same priority level, sort alphabetically by website
     return a.website.toLowerCase().localeCompare(b.website.toLowerCase());
   });
@@ -210,7 +229,7 @@ export function SidePanel() {
               <div className="text-sm mt-1 opacity-90">
                 Current site: {currentDomain}
                 {(() => {
-                  const domainCount = passwords.filter(p => 
+                  const domainCount = passwords.filter(p =>
                     p.website.toLowerCase().includes(currentDomain.toLowerCase())
                   ).length;
                   return domainCount > 0 ? ` (${domainCount} password${domainCount > 1 ? 's' : ''})` : '';
@@ -222,11 +241,10 @@ export function SidePanel() {
             <button
               onClick={() => setShowHealthDashboard(!showHealthDashboard)}
               disabled={isVaultLocked}
-              className={`p-2 rounded-lg transition-colors ${
-                isVaultLocked 
-                  ? 'opacity-50 cursor-not-allowed' 
-                  : 'hover:bg-white hover:bg-opacity-20'
-              }`}
+              className={`p-2 rounded-lg transition-colors ${isVaultLocked
+                ? 'opacity-50 cursor-not-allowed'
+                : 'hover:bg-white hover:bg-opacity-20'
+                }`}
               title={isVaultLocked ? "Unlock vault to access" : "Password Health Dashboard"}
             >
               <span className="text-lg">📊</span>
@@ -234,11 +252,10 @@ export function SidePanel() {
             <button
               onClick={() => setShowFileManager(!showFileManager)}
               disabled={isVaultLocked}
-              className={`p-2 rounded-lg transition-colors ${
-                isVaultLocked 
-                  ? 'opacity-50 cursor-not-allowed' 
-                  : 'hover:bg-white hover:bg-opacity-20'
-              }`}
+              className={`p-2 rounded-lg transition-colors ${isVaultLocked
+                ? 'opacity-50 cursor-not-allowed'
+                : 'hover:bg-white hover:bg-opacity-20'
+                }`}
               title={isVaultLocked ? "Unlock vault to access" : "File Manager"}
             >
               <span className="text-lg">📁</span>
@@ -256,10 +273,10 @@ export function SidePanel() {
               onClick={handleSecurityIconClick}
               className="p-2 rounded-lg hover:bg-white hover:bg-opacity-20 transition-colors"
               title={
-                !hasMasterPassword 
-                  ? "Setup Master Password" 
-                  : isVaultLocked 
-                    ? "Unlock Vault" 
+                !hasMasterPassword
+                  ? "Setup Master Password"
+                  : isVaultLocked
+                    ? "Unlock Vault"
                     : "Lock Vault"
               }
             >
@@ -287,9 +304,9 @@ export function SidePanel() {
 
       {!isVaultLocked && showFileManager && (
         <div className="p-4 themed-bg-primary border-b themed-border">
-          <FileManager 
+          <FileManager
             onImportComplete={loadPasswords}
-            onClose={() => setShowFileManager(false)} 
+            onClose={() => setShowFileManager(false)}
           />
         </div>
       )}
@@ -297,7 +314,7 @@ export function SidePanel() {
       {showHealthDashboard && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="max-w-4xl w-full max-h-[90vh]">
-            <PasswordHealthDashboard 
+            <PasswordHealthDashboard
               passwords={passwords}
               onPasswordEdit={(password) => {
                 setEditingPassword(password);
@@ -317,9 +334,8 @@ export function SidePanel() {
           value={isVaultLocked ? "" : searchTerm}
           onChange={(e) => !isVaultLocked && setSearchTerm(e.target.value)}
           disabled={isVaultLocked}
-          className={`w-full px-3 py-2 themed-border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--accent-500)] themed-bg-primary themed-text-primary ${
-            isVaultLocked ? 'opacity-50 cursor-not-allowed' : ''
-          }`}
+          className={`w-full px-3 py-2 themed-border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--accent-500)] themed-bg-primary themed-text-primary ${isVaultLocked ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
         />
       </div>
 
@@ -327,11 +343,10 @@ export function SidePanel() {
         <button
           onClick={() => showForm ? setShowForm(false) : handleShowNewPasswordForm()}
           disabled={isVaultLocked}
-          className={`w-full font-medium py-2 px-4 rounded-md transition-colors ${
-            isVaultLocked 
-              ? 'bg-gray-400 text-gray-600 cursor-not-allowed' 
-              : 'themed-accent-bg hover:themed-accent-hover text-white'
-          }`}
+          className={`w-full font-medium py-2 px-4 rounded-md transition-colors ${isVaultLocked
+            ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+            : 'themed-accent-bg hover:themed-accent-hover text-white'
+            }`}
         >
           {isVaultLocked ? 'Vault Locked' : showForm ? 'Cancel' : 'Add New Password'}
         </button>
@@ -350,8 +365,8 @@ export function SidePanel() {
             <PasswordForm
               password={editingPassword}
               currentDomain={currentDomain}
-              onSave={editingPassword ? 
-                (data: Partial<Omit<PasswordEntry, 'id' | 'createdAt'>>) => handleUpdatePassword(editingPassword.id, data) : 
+              onSave={editingPassword ?
+                (data: Partial<Omit<PasswordEntry, 'id' | 'createdAt'>>) => handleUpdatePassword(editingPassword.id, data) :
                 handleAddPassword
               }
               onCancel={handleCancelEdit}
@@ -396,6 +411,7 @@ export function SidePanel() {
           onClose={() => {
             setShowMasterPasswordUnlock(false);
           }}
+          onReset={handleVaultReset}
         />
       )}
 

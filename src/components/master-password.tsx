@@ -175,9 +175,10 @@ export function MasterPasswordSetup({ onComplete, onClose }: MasterPasswordSetup
 interface MasterPasswordUnlockProps {
   onUnlock: () => void;
   onClose: () => void;
+  onReset?: () => void;
 }
 
-export function MasterPasswordUnlock({ onUnlock, onClose }: MasterPasswordUnlockProps) {
+export function MasterPasswordUnlock({ onUnlock, onClose, onReset }: MasterPasswordUnlockProps) {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -289,15 +290,25 @@ export function MasterPasswordUnlock({ onUnlock, onClose }: MasterPasswordUnlock
             <div className="pt-4 border-t themed-border">
               <button
                 type="button"
-                onClick={() => {
-                  if (confirm('This will delete all stored passwords. Are you sure?')) {
-                    securityService.resetSecurity();
-                    onClose();
+                onClick={async () => {
+                  if (confirm('⚠️ WARNING: This will permanently delete ALL stored passwords and data. This action cannot be undone!\n\nAre you absolutely sure you want to proceed?')) {
+                    try {
+                      await securityService.resetSecurity();
+                      // Call the reset callback if provided, otherwise reload
+                      if (onReset) {
+                        onReset();
+                      } else {
+                        window.location.reload();
+                      }
+                      onClose();
+                    } catch (error) {
+                      setError('Failed to reset vault. Please try again.');
+                    }
                   }
                 }}
                 className="w-full px-4 py-2 bg-red-500 text-white rounded-md text-sm font-medium hover:bg-red-600"
               >
-                Reset Vault (Delete All Data)
+                🗑️ Reset Vault (Delete All Data)
               </button>
             </div>
           )}

@@ -255,7 +255,20 @@ class SecurityServiceImpl implements SecurityService {
   async resetSecurity(): Promise<void> {
     this.lockVault();
     this.state.masterPasswordHash = null;
-    await this.saveSecurityState();
+    
+    // Clear all stored passwords and security data
+    try {
+      await chrome.storage.local.clear(); // This clears ALL extension data
+      await this.saveSecurityState();
+      
+      // Also clear localStorage security state
+      localStorage.removeItem(this.STORAGE_KEY);
+      
+      console.log('Security: All data has been cleared');
+    } catch (error) {
+      console.error('Security: Failed to clear all data:', error);
+      throw new Error('Failed to reset security data');
+    }
   }
 
   /**
