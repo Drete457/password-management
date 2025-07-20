@@ -238,7 +238,7 @@ export function SidePanel() {
             )}
           </div>
           <div className="flex space-x-2">
-            {sortedPasswords.length > 0 && <button
+            {passwords.length > 0 && <button
               onClick={() => setShowHealthDashboard(!showHealthDashboard)}
               disabled={isVaultLocked}
               className={`p-2 rounded-lg transition-colors ${isVaultLocked
