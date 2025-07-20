@@ -14,6 +14,7 @@ export interface SecurityService {
   unlockVault(masterPassword: string): Promise<boolean>;
   isLocked(): boolean;
   setMasterPassword(password: string): Promise<void>;
+  changeMasterPassword(currentPassword: string, newPassword: string): Promise<void>;
   hasMasterPassword(): Promise<boolean>;
   encryptData(data: string): string;
   decryptData(encryptedData: string): string | null;
@@ -81,6 +82,64 @@ class SecurityServiceImpl implements SecurityService {
 
     await this.saveSecurityState();
     this.setAutoLockTimer(this.DEFAULT_AUTO_LOCK_MINUTES);
+  }
+
+  async changeMasterPassword(currentPassword: string, newPassword: string): Promise<void> {
+    // First verify the current password
+    const isValidCurrent = await this.unlockVault(currentPassword);
+    if (!isValidCurrent) {
+      throw new Error('Current password is incorrect');
+    }
+
+    if (!newPassword || newPassword.length < 8) {
+      throw new Error('New master password must be at least 8 characters long');
+    }
+
+    // Get all encrypted passwords before changing the master password
+    const passwordService = (await import('./password-service')).passwordService;
+    const allPasswords = await passwordService.getAll();
+
+    // Decrypt all passwords with current key
+    const decryptedPasswords = allPasswords.map(password => ({
+      ...password,
+      password: this.decryptData(password.password) || password.password
+    }));
+
+    // Generate new hash and encryption key
+    const newHash = CryptoJS.PBKDF2(newPassword, this.SALT, {
+      keySize: 256 / 32,
+      iterations: 10000
+    }).toString();
+
+    const newEncryptionKey = CryptoJS.PBKDF2(newPassword + '_encryption', this.SALT, {
+      keySize: 256 / 32,
+      iterations: 10000
+    }).toString();
+
+    // Update the encryption key
+    const oldEncryptionKey = this.state.encryptionKey;
+    this.state.encryptionKey = newEncryptionKey;
+
+    // Re-encrypt all passwords with new key
+    const reEncryptedPasswords = decryptedPasswords.map(password => ({
+      ...password,
+      password: this.encryptData(password.password)
+    }));
+
+    try {
+      // Save re-encrypted passwords
+      await chrome.storage.local.set({ passwords: reEncryptedPasswords });
+
+      // Update master password hash
+      this.state.masterPasswordHash = newHash;
+      this.state.lastActivity = Date.now();
+
+      await this.saveSecurityState();
+    } catch (error) {
+      // If saving fails, restore old encryption key
+      this.state.encryptionKey = oldEncryptionKey;
+      throw new Error('Failed to change master password. Please try again.');
+    }
   }
 
   /**

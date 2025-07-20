@@ -306,3 +306,211 @@ export function MasterPasswordUnlock({ onUnlock, onClose }: MasterPasswordUnlock
     </div>
   );
 }
+
+interface MasterPasswordChangeProps {
+  onComplete: () => void;
+  onClose: () => void;
+}
+
+export function MasterPasswordChange({ onComplete, onClose }: MasterPasswordChangeProps) {
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const validatePassword = (password: string): { isValid: boolean; message: string } => {
+    if (!password) {
+      return { isValid: false, message: 'Password is required' };
+    }
+
+    if (password.length < 8) {
+      return { isValid: false, message: 'Password must be at least 8 characters long' };
+    }
+
+    if (!/(?=.*[a-z])/.test(password)) {
+      return { isValid: false, message: 'Password must contain at least one lowercase letter' };
+    }
+
+    if (!/(?=.*[A-Z])/.test(password)) {
+      return { isValid: false, message: 'Password must contain at least one uppercase letter' };
+    }
+
+    if (!/(?=.*\d)/.test(password)) {
+      return { isValid: false, message: 'Password must contain at least one number' };
+    }
+
+    if (!/(?=.*[!@#$%^&*(),.?":{}|<>])/.test(password)) {
+      return { isValid: false, message: 'Password must contain at least one special character' };
+    }
+
+    return { isValid: true, message: '' };
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+
+    // Validate current password by attempting to unlock
+    try {
+      const isValidCurrent = await securityService.unlockVault(currentPassword);
+      if (!isValidCurrent) {
+        setError('Current password is incorrect');
+        return;
+      }
+    } catch (error) {
+      setError('Current password is incorrect');
+      return;
+    }
+
+    // Validate new password
+    const validation = validatePassword(newPassword);
+    if (!validation.isValid) {
+      setError(validation.message);
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setError('New passwords do not match');
+      return;
+    }
+
+    if (newPassword === currentPassword) {
+      setError('New password must be different from current password');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      // Change the master password
+      await securityService.changeMasterPassword(currentPassword, newPassword);
+      onComplete();
+    } catch (error) {
+      console.error('Error changing master password:', error);
+      setError('Failed to change master password. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="themed-bg-primary rounded-lg shadow-xl w-full max-w-md mx-4 border themed-border">
+        <div className="p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-bold themed-text-primary">Change Master Password</h2>
+            <button
+              onClick={onClose}
+              className="themed-text-secondary hover:themed-text-primary"
+            >
+              ✕
+            </button>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
+              <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-500/30">
+                <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
+              </div>
+            )}
+
+            <div>
+              <label htmlFor="currentPassword" className="block text-sm font-medium themed-text-primary mb-2">
+                Current Master Password
+              </label>
+              <div className="relative">
+                <input
+                  type={showCurrentPassword ? 'text' : 'password'}
+                  id="currentPassword"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  className="w-full px-3 py-2 pr-10 border-2 border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center themed-text-secondary hover:themed-text-primary"
+                >
+                  {showCurrentPassword ? '🙈' : '👁️'}
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="newPassword" className="block text-sm font-medium themed-text-primary mb-2">
+                New Master Password
+              </label>
+              <div className="relative">
+                <input
+                  type={showNewPassword ? 'text' : 'password'}
+                  id="newPassword"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full px-3 py-2 pr-10 border-2 border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center themed-text-secondary hover:themed-text-primary"
+                >
+                  {showNewPassword ? '🙈' : '👁️'}
+                </button>
+              </div>
+              {newPassword && (
+                <div className="mt-2">
+                  <PasswordStrengthIndicator password={newPassword} />
+                </div>
+              )}
+            </div>
+
+            <div>
+              <label htmlFor="confirmPassword" className="block text-sm font-medium themed-text-primary mb-2">
+                Confirm New Password
+              </label>
+              <div className="relative">
+                <input
+                  type={showConfirm ? 'text' : 'password'}
+                  id="confirmPassword"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full px-3 py-2 pr-10 border-2 border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm(!showConfirm)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center themed-text-secondary hover:themed-text-primary"
+                >
+                  {showConfirm ? '🙈' : '👁️'}
+                </button>
+              </div>
+            </div>
+
+            <div className="flex space-x-3 pt-4">
+              <button
+                type="submit"
+                disabled={isLoading || !currentPassword || !newPassword || !confirmPassword}
+                className="flex-1 themed-accent-bg hover:themed-accent-hover text-white font-medium py-2 px-4 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoading ? 'Changing...' : 'Change Password'}
+              </button>
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 themed-border themed-text-primary hover:themed-bg-secondary font-medium py-2 px-4 rounded-md"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+}

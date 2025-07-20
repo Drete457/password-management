@@ -7,7 +7,7 @@ import { PasswordForm } from './password-form';
 import { ThemeSettings } from './theme-settings';
 import { FileManager } from './file-manager';
 import { PasswordHealthDashboard } from './password-health-dashboard';
-import { MasterPasswordSetup, MasterPasswordUnlock } from './master-password';
+import { MasterPasswordSetup, MasterPasswordUnlock, MasterPasswordChange } from './master-password';
 import { useTheme } from '../contexts/theme-context';
 
 export function SidePanel() {
@@ -22,6 +22,7 @@ export function SidePanel() {
   const [currentDomain, setCurrentDomain] = useState<string>('');
   const [showMasterPasswordSetup, setShowMasterPasswordSetup] = useState<boolean>(false);
   const [showMasterPasswordUnlock, setShowMasterPasswordUnlock] = useState<boolean>(false);
+  const [showMasterPasswordChange, setShowMasterPasswordChange] = useState<boolean>(false);
   const [isVaultLocked, setIsVaultLocked] = useState<boolean>(false);
   const [hasMasterPassword, setHasMasterPassword] = useState<boolean>(false);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
@@ -242,6 +243,15 @@ export function SidePanel() {
             >
               <span className="text-lg">📁</span>
             </button>
+            {hasMasterPassword && !isVaultLocked && (
+              <button
+                onClick={() => setShowMasterPasswordChange(true)}
+                className="p-2 rounded-lg hover:bg-white hover:bg-opacity-20 transition-colors"
+                title="Change Master Password"
+              >
+                <span className="text-lg">⚙️</span>
+              </button>
+            )}
             <button
               onClick={handleSecurityIconClick}
               className="p-2 rounded-lg hover:bg-white hover:bg-opacity-20 transition-colors"
@@ -260,6 +270,7 @@ export function SidePanel() {
             <button
               onClick={() => setShowThemeSettings(!showThemeSettings)}
               className="p-2 rounded-lg hover:bg-white hover:bg-opacity-20 transition-colors"
+              disabled={isVaultLocked}
               title="Theme Settings"
             >
               <span className="text-lg">{isDark ? '🌙' : '☀️'}</span>
@@ -268,13 +279,13 @@ export function SidePanel() {
         </div>
       </header>
 
-      {showThemeSettings && (
+      {!isVaultLocked && showThemeSettings && (
         <div className="p-4 themed-bg-primary border-b themed-border">
           <ThemeSettings onClose={() => setShowThemeSettings(false)} />
         </div>
       )}
 
-      {showFileManager && (
+      {!isVaultLocked && showFileManager && (
         <div className="p-4 themed-bg-primary border-b themed-border">
           <FileManager 
             onImportComplete={loadPasswords}
@@ -384,6 +395,19 @@ export function SidePanel() {
           }}
           onClose={() => {
             setShowMasterPasswordUnlock(false);
+          }}
+        />
+      )}
+
+      {showMasterPasswordChange && (
+        <MasterPasswordChange
+          onComplete={() => {
+            setShowMasterPasswordChange(false);
+            // Reload passwords after changing master password
+            loadPasswords();
+          }}
+          onClose={() => {
+            setShowMasterPasswordChange(false);
           }}
         />
       )}
