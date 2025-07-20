@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { PasswordEntry } from '../types/password';
+import { PasswordStrengthIndicator, PasswordGenerator } from './password-strength-indicator';
 
 interface PasswordFormProps {
   password?: PasswordEntry | null;
@@ -13,6 +14,7 @@ export function PasswordForm({ password, currentDomain, onSave, onCancel }: Pass
   const [username, setUsername] = useState<string>('');
   const [passwordValue, setPasswordValue] = useState<string>('');
   const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [showGenerator, setShowGenerator] = useState<boolean>(false);
 
   useEffect(() => {
     if (password) {
@@ -33,6 +35,11 @@ export function PasswordForm({ password, currentDomain, onSave, onCancel }: Pass
       result += charset.charAt(Math.floor(Math.random() * charset.length));
     }
     setPasswordValue(result);
+  };
+
+  const handleGeneratedPassword = (password: string) => {
+    setPasswordValue(password);
+    setShowGenerator(false);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -97,7 +104,7 @@ export function PasswordForm({ password, currentDomain, onSave, onCancel }: Pass
             value={passwordValue}
             onChange={(e) => setPasswordValue(e.target.value)}
             placeholder="Enter or generate a password"
-            className="w-full px-3 py-2 pr-20 themed-border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--accent-500)] themed-bg-primary themed-text-primary"
+            className="w-full px-3 py-2 pr-32 themed-border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--accent-500)] themed-bg-primary themed-text-primary"
             required
           />
           <div className="absolute inset-y-0 right-0 flex items-center space-x-1 pr-2">
@@ -117,8 +124,30 @@ export function PasswordForm({ password, currentDomain, onSave, onCancel }: Pass
             >
               🎲
             </button>
+            <button
+              type="button"
+              onClick={() => setShowGenerator(!showGenerator)}
+              className="themed-accent-text hover:text-[var(--accent-600)] p-1 rounded hover:bg-[var(--accent-50)] transition-colors"
+              title="Advanced password generator"
+            >
+              ⚙️
+            </button>
           </div>
         </div>
+
+        {/* Password Strength Indicator */}
+        {passwordValue && (
+          <div className="mt-3">
+            <PasswordStrengthIndicator password={passwordValue} />
+          </div>
+        )}
+
+        {/* Advanced Password Generator */}
+        {showGenerator && (
+          <div className="mt-3 p-4 rounded-lg themed-bg-secondary themed-border">
+            <PasswordGenerator onPasswordGenerated={handleGeneratedPassword} />
+          </div>
+        )}
       </div>
 
       <div className="flex space-x-3 pt-4">

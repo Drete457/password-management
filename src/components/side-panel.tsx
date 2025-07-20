@@ -5,6 +5,7 @@ import { PasswordList } from './password-list';
 import { PasswordForm } from './password-form';
 import { ThemeSettings } from './theme-settings';
 import { FileManager } from './file-manager';
+import { PasswordHealthDashboard } from './password-health-dashboard';
 import { useTheme } from '../contexts/theme-context';
 
 export function SidePanel() {
@@ -13,6 +14,7 @@ export function SidePanel() {
   const [showForm, setShowForm] = useState<boolean>(false);
   const [showThemeSettings, setShowThemeSettings] = useState<boolean>(false);
   const [showFileManager, setShowFileManager] = useState<boolean>(false);
+  const [showHealthDashboard, setShowHealthDashboard] = useState<boolean>(false);
   const [editingPassword, setEditingPassword] = useState<PasswordEntry | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [currentDomain, setCurrentDomain] = useState<string>('');
@@ -160,6 +162,13 @@ export function SidePanel() {
           </div>
           <div className="flex space-x-2">
             <button
+              onClick={() => setShowHealthDashboard(!showHealthDashboard)}
+              className="p-2 rounded-lg hover:bg-white hover:bg-opacity-20 transition-colors"
+              title="Password Health Dashboard"
+            >
+              <span className="text-lg">📊</span>
+            </button>
+            <button
               onClick={() => setShowFileManager(!showFileManager)}
               className="p-2 rounded-lg hover:bg-white hover:bg-opacity-20 transition-colors"
               title="File Manager"
@@ -189,6 +198,22 @@ export function SidePanel() {
             onImportComplete={loadPasswords}
             onClose={() => setShowFileManager(false)} 
           />
+        </div>
+      )}
+
+      {showHealthDashboard && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="max-w-4xl w-full max-h-[90vh]">
+            <PasswordHealthDashboard 
+              passwords={passwords}
+              onPasswordEdit={(password) => {
+                setEditingPassword(password);
+                setShowForm(true);
+                setShowHealthDashboard(false);
+              }}
+              onClose={() => setShowHealthDashboard(false)}
+            />
+          </div>
         </div>
       )}
 
