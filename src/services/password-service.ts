@@ -70,8 +70,8 @@ class ChromeStoragePasswordService implements PasswordDatabase {
   /**
    * Encripta dados sensíveis se o master password estiver configurado
    */
-  private encryptSensitiveData(entry: PasswordEntry): PasswordEntry {
-    if (!securityService.isLocked()) {
+  private async encryptSensitiveData(entry: PasswordEntry): Promise<PasswordEntry> {
+    if (!(await securityService.isLocked())) {
       try {
         return {
           ...entry,
@@ -88,8 +88,8 @@ class ChromeStoragePasswordService implements PasswordDatabase {
   /**
    * Decripta dados sensíveis se estiverem encriptados
    */
-  private decryptSensitiveData(entry: PasswordEntry): PasswordEntry {
-    if (!securityService.isLocked()) {
+  private async decryptSensitiveData(entry: PasswordEntry): Promise<PasswordEntry> {
+    if (!(await securityService.isLocked())) {
       try {
         const decryptedPassword = securityService.decryptData(entry.password);
         const decryptedUsername = securityService.decryptData(entry.username);
@@ -110,7 +110,7 @@ class ChromeStoragePasswordService implements PasswordDatabase {
     console.log('PasswordService: Loading passwords from storage...');
     const passwords = await this.loadFromStorage();
     console.log('PasswordService: Raw passwords loaded:', passwords);
-    const decryptedPasswords = passwords.map(entry => this.decryptSensitiveData(entry));
+    const decryptedPasswords = await Promise.all(passwords.map(entry => this.decryptSensitiveData(entry)));
     console.log('PasswordService: Decrypted passwords:', decryptedPasswords);
     return decryptedPasswords;
   }
@@ -118,7 +118,7 @@ class ChromeStoragePasswordService implements PasswordDatabase {
   async getById(id: string): Promise<PasswordEntry | undefined> {
     const passwords = await this.loadFromStorage();
     const entry = passwords.find(p => p.id === id);
-    return entry ? this.decryptSensitiveData(entry) : undefined;
+    return entry ? await this.decryptSensitiveData(entry) : undefined;
   }
 
   async add(entry: Omit<PasswordEntry, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
@@ -134,7 +134,7 @@ class ChromeStoragePasswordService implements PasswordDatabase {
     };
 
     // Encripta dados sensíveis antes de salvar
-    const encryptedEntry = this.encryptSensitiveData(newEntry);
+    const encryptedEntry = await this.encryptSensitiveData(newEntry);
     
     passwords.push(encryptedEntry);
     await this.saveToStorage(passwords);
@@ -158,7 +158,7 @@ class ChromeStoragePasswordService implements PasswordDatabase {
     };
 
     // Encripta dados sensíveis antes de salvar
-    const encryptedEntry = this.encryptSensitiveData(updatedEntry);
+    const encryptedEntry = await this.encryptSensitiveData(updatedEntry);
     
     passwords[index] = encryptedEntry;
     await this.saveToStorage(passwords);

@@ -12,7 +12,7 @@ export interface SecurityService {
   // Novas funcionalidades de Master Password
   lockVault(): void;
   unlockVault(masterPassword: string): Promise<boolean>;
-  isLocked(): boolean;
+  isLocked(): Promise<boolean>;
   setMasterPassword(password: string): Promise<void>;
   changeMasterPassword(currentPassword: string, newPassword: string): Promise<void>;
   hasMasterPassword(): Promise<boolean>;
@@ -193,7 +193,8 @@ class SecurityServiceImpl implements SecurityService {
   /**
    * Checks if the vault is locked
    */
-  isLocked(): boolean {
+  async isLocked(): Promise<boolean> {
+    await this.loadSecurityState();
     return this.state.isLocked;
   }
 

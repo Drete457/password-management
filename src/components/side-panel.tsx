@@ -69,7 +69,7 @@ export function SidePanel() {
       setHasMasterPassword(hasMP);
 
       if (hasMP) {
-        const isLocked = securityService.isLocked();
+        const isLocked = await securityService.isLocked();
         console.log('SidePanel: Vault locked:', isLocked);
         setIsVaultLocked(isLocked);
 
@@ -107,7 +107,7 @@ export function SidePanel() {
       setIsLoading(true);
 
       // Check if we have master password setup and vault is locked
-      if (hasMasterPassword && securityService.isLocked()) {
+      if (hasMasterPassword && await securityService.isLocked()) {
         setPasswords([]);
         return;
       }
@@ -175,7 +175,7 @@ export function SidePanel() {
     if (!hasMP) {
       // No master password configured, show setup
       setShowMasterPasswordSetup(true);
-    } else if (isVaultLocked && securityService.isLocked()) {
+    } else if (isVaultLocked && await securityService.isLocked()) {
       // Has master password but is locked, show unlock
       setShowMasterPasswordUnlock(true);
     } else {

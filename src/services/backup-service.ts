@@ -98,8 +98,11 @@ class BackupPasswordService implements BackupService {
       const hasMasterPassword = await securityService.hasMasterPassword();
       
       // Only check if vault is locked when there's a master password configured
-      if (hasMasterPassword && securityService.isLocked()) {
-        throw new Error('Vault is locked. Please unlock the vault before importing passwords.');
+      if (hasMasterPassword) {
+        const isLocked = await securityService.isLocked();
+        if (isLocked) {
+          throw new Error('Vault is locked. Please unlock the vault before importing passwords.');
+        }
       }
 
       // Convert back to PasswordEntry objects
@@ -117,17 +120,23 @@ class BackupPasswordService implements BackupService {
       const currentPasswords = await passwordService.getAll();
       console.log(`Found ${currentPasswords.length} existing passwords to clear`);
       
-      for (const password of currentPasswords) {
-        await passwordService.delete(password.id);
-      }
+      // Clear all current passwords first
+      await passwordService.clearAll();
 
       console.log(`Importing ${passwords.length} new passwords...`);
-      for (const password of passwords) {
-        await passwordService.add({
-          website: password.website,
-          username: password.username,
-          password: password.password
-        });
+      for (let i = 0; i < passwords.length; i++) {
+        const password = passwords[i];
+        console.log(`Importing password ${i + 1}/${passwords.length}:`, password.website);
+        try {
+          await passwordService.add({
+            website: password.website,
+            username: password.username,
+            password: password.password
+          });
+        } catch (error) {
+          console.error(`Failed to import password ${i + 1}:`, error);
+          throw new Error(`Failed to import password for ${password.website}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
       }
       
       console.log('Import completed successfully');
