@@ -194,20 +194,7 @@ class SecurityServiceImpl implements SecurityService {
    * Checks if the vault is locked
    */
   async isLocked(): Promise<boolean> {
-    console.log('SecurityService.isLocked(): Before loadSecurityState - current state:', {
-      isLocked: this.state.isLocked,
-      hasEncryptionKey: !!this.state.encryptionKey,
-      hasMasterPasswordHash: !!this.state.masterPasswordHash
-    });
-    
     await this.loadSecurityState();
-    
-    console.log('SecurityService.isLocked(): After loadSecurityState - final state:', {
-      isLocked: this.state.isLocked,
-      hasEncryptionKey: !!this.state.encryptionKey,
-      hasMasterPasswordHash: !!this.state.masterPasswordHash
-    });
-    
     return this.state.isLocked;
   }
 
