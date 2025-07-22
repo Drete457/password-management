@@ -7,6 +7,7 @@ import { PasswordForm } from './password-form';
 import { ThemeSettings } from './theme-settings';
 import { FileManager } from './file-manager';
 import { PasswordHealthDashboard } from './password-health-dashboard';
+import { BreachCheckComponent } from './breach-check';
 import { MasterPasswordSetup, MasterPasswordUnlock, MasterPasswordChange } from './master-password';
 import { useTheme } from '../contexts/theme-context';
 
@@ -17,6 +18,7 @@ export function SidePanel() {
   const [showThemeSettings, setShowThemeSettings] = useState<boolean>(false);
   const [showFileManager, setShowFileManager] = useState<boolean>(false);
   const [showHealthDashboard, setShowHealthDashboard] = useState<boolean>(false);
+  const [showBreachCheck, setShowBreachCheck] = useState<boolean>(false);
   const [editingPassword, setEditingPassword] = useState<PasswordEntry | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [currentDomain, setCurrentDomain] = useState<string>('');
@@ -252,6 +254,17 @@ export function SidePanel() {
             >
               <span className="text-lg">📊</span>
             </button>}
+            {passwords.length > 0 && <button
+              onClick={() => setShowBreachCheck(!showBreachCheck)}
+              disabled={isVaultLocked}
+              className={`p-2 rounded-lg transition-colors ${isVaultLocked
+                ? 'opacity-50 cursor-not-allowed'
+                : 'hover:bg-white hover:bg-opacity-20'
+                }`}
+              title={isVaultLocked ? "Unlock vault to access" : "Check for Breached Passwords"}
+            >
+              <span className="text-lg">🛡️</span>
+            </button>}
             <button
               onClick={() => setShowFileManager(!showFileManager)}
               disabled={isVaultLocked}
@@ -327,6 +340,15 @@ export function SidePanel() {
               onClose={() => setShowHealthDashboard(false)}
             />
           </div>
+        </div>
+      )}
+
+      {showBreachCheck && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <BreachCheckComponent
+            passwords={passwords}
+            onClose={() => setShowBreachCheck(false)}
+          />
         </div>
       )}
 

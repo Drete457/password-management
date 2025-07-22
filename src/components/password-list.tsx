@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { PasswordEntry } from '../types/password';
+import { PasswordBreachIndicator } from './password-breach-indicator';
 
 interface PasswordListProps {
   passwords: PasswordEntry[];
@@ -105,7 +106,8 @@ export function PasswordList({ passwords, currentDomain, onEdit, onDelete }: Pas
             <div className="mb-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs themed-text-secondary uppercase tracking-wide">Password</span>
-                <div className="flex space-x-1">
+                <div className="flex items-center space-x-1">
+                  <PasswordBreachIndicator password={password.password} compact={true} />
                   <button
                     onClick={() => togglePasswordVisibility(password.id)}
                     className="themed-text-secondary hover:themed-text-primary text-sm p-1 hover:bg-[var(--bg-tertiary)] rounded transition-colors"
