@@ -1,11 +1,11 @@
 # Password Manager - Chrome Extension
 
-A password manager Chrome extension that allows you to securely store, view, edit, and organize your credentials using IndexedDB with advanced security features.
+A password manager Chrome extension that allows you to securely store, view, edit, and organize your credentials using Chrome's local storage with advanced security features.
 
 ## Features
 
 - ✅ **Sidebar Interface**: Side interface that opens when clicking the extension icon
-- ✅ **Local Storage**: Data saved in browser's IndexedDB (not sent to external servers)
+- ✅ **Local Storage**: Data saved in the extension's local storage (not sent to external servers)
 - ✅ **Complete Management**: Add, edit, delete, and search passwords
 - ✅ **Password Generator**: Automatic generation of secure passwords
 - ✅ **Copy Credentials**: Buttons to copy username and password
@@ -34,7 +34,7 @@ A password manager Chrome extension that allows you to securely store, view, edi
 - **Health Dashboard**: Visual overview of password security status
 
 ### Data Protection
-- **Local Encryption**: Data encrypted before storage in IndexedDB
+- **Local Encryption**: Data encrypted before storage in chrome.storage.local
 - **Extension Isolation**: Secure storage isolated from other extensions
 - **No External Servers**: All data stays on your device
 - **Integrity Validation**: Tamper detection and data verification
@@ -76,7 +76,7 @@ A password manager Chrome extension that allows you to securely store, view, edi
 
 ### Security Features
 - **Local Storage**: Data stays only on your computer
-- **Browser Encryption**: IndexedDB uses Chrome's native encryption
+- **Extension Storage**: Chrome's extension storage with native security
 - **No Sync**: Data is not sent to external servers
 - **Password Generator**: Automatic creation of strong passwords
 
@@ -98,7 +98,7 @@ src/
 - **TypeScript**: Static typing for enhanced security
 - **Tailwind CSS**: Fast and responsive styling
 - **Vite**: Fast build tool
-- **IndexedDB**: Browser's local database
+- **Chrome Storage**: Extension's local storage
 - **Chrome Extensions API**: Browser integration
 
 ## Extension Permissions
@@ -128,7 +128,7 @@ npm run lint
 This extension was designed with security and privacy as top priorities:
 - **No data collection**: No information is sent to external servers
 - **Master password encryption**: All sensitive data encrypted with AES-256
-- **Local storage**: All data stays in your browser's IndexedDB
+- **Local storage**: All data stays in your extension's secure local storage
 - **Extension isolation**: Data cannot be accessed by other extensions
 - **Auto-lock protection**: Vault automatically locks after inactivity
 - **Memory safety**: Encryption keys cleared when locked

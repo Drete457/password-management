@@ -1,32 +1,66 @@
 import { PasswordEntry, PasswordDatabase } from '../types/password';
 import { securityService } from './master-password-service';
 
-class IndexedDBPasswordService implements PasswordDatabase {
-  private dbName = 'PasswordManagerDB';
-  private version = 2;
-  private storeName = 'passwords';
+class ChromeStoragePasswordService implements PasswordDatabase {
+  private storageKey = 'password_manager_passwords';
 
-  private async openDatabase(): Promise<IDBDatabase> {
-    return new Promise((resolve, reject) => {
-      const request = indexedDB.open(this.dbName, this.version);
+  private async saveToStorage(passwords: PasswordEntry[]): Promise<void> {
+    try {
+      await chrome.storage.local.set({ [this.storageKey]: passwords });
+    } catch (error) {
+      console.error('Failed to save to chrome storage:', error);
+      throw new Error('Failed to save passwords');
+    }
+  }
 
-      request.onerror = () => {
-        reject(new Error('Failed to open database'));
-      };
+  private async loadFromStorage(): Promise<PasswordEntry[]> {
+    try {
+      const result = await chrome.storage.local.get(this.storageKey);
+      const passwords = result[this.storageKey] || [];
+      console.log('PasswordService: Raw data from storage:', passwords);
+      
+      const processed = passwords.map((entry: any) => {
+        // Validate and convert dates
+        let createdAt: Date;
+        let updatedAt: Date;
 
-      request.onsuccess = () => {
-        resolve(request.result);
-      };
-
-      request.onupgradeneeded = (event) => {
-        const db = (event.target as IDBOpenDBRequest).result;
-        if (!db.objectStoreNames.contains(this.storeName)) {
-          const store = db.createObjectStore(this.storeName, { keyPath: 'id' });
-          store.createIndex('website', 'website', { unique: false });
-          store.createIndex('username', 'username', { unique: false });
+        try {
+          createdAt = entry.createdAt ? new Date(entry.createdAt) : new Date();
+          if (isNaN(createdAt.getTime())) {
+            console.warn('PasswordService: Invalid createdAt date, using current date:', entry.createdAt);
+            createdAt = new Date();
+          }
+        } catch (error) {
+          console.warn('PasswordService: Error parsing createdAt, using current date:', error);
+          createdAt = new Date();
         }
-      };
-    });
+
+        try {
+          updatedAt = entry.updatedAt ? new Date(entry.updatedAt) : new Date();
+          if (isNaN(updatedAt.getTime())) {
+            console.warn('PasswordService: Invalid updatedAt date, using current date:', entry.updatedAt);
+            updatedAt = new Date();
+          }
+        } catch (error) {
+          console.warn('PasswordService: Error parsing updatedAt, using current date:', error);
+          updatedAt = new Date();
+        }
+
+        const processedEntry = {
+          ...entry,
+          createdAt,
+          updatedAt
+        };
+        console.log('PasswordService: Processing entry:', entry, '-> Processed:', processedEntry);
+        return processedEntry;
+      });
+      
+      console.log('PasswordService: Final processed passwords:', processed);
+      return processed;
+    } catch (error) {
+      console.error('Failed to load from chrome storage:', error);
+      return [];
+    }
   }
 
   private generateId(): string {
@@ -73,61 +107,22 @@ class IndexedDBPasswordService implements PasswordDatabase {
   }
 
   async getAll(): Promise<PasswordEntry[]> {
-    const db = await this.openDatabase();
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction([this.storeName], 'readonly');
-      const store = transaction.objectStore(this.storeName);
-      const request = store.getAll();
-
-      request.onsuccess = () => {
-        const entries = request.result.map(entry => {
-          const parsedEntry = {
-            ...entry,
-            createdAt: new Date(entry.createdAt),
-            updatedAt: new Date(entry.updatedAt)
-          };
-          
-          // Tenta decriptar se não estiver bloqueado
-          return this.decryptSensitiveData(parsedEntry);
-        });
-        resolve(entries);
-      };
-
-      request.onerror = () => {
-        reject(new Error('Failed to retrieve entries'));
-      };
-    });
+    console.log('PasswordService: Loading passwords from storage...');
+    const passwords = await this.loadFromStorage();
+    console.log('PasswordService: Raw passwords loaded:', passwords);
+    const decryptedPasswords = passwords.map(entry => this.decryptSensitiveData(entry));
+    console.log('PasswordService: Decrypted passwords:', decryptedPasswords);
+    return decryptedPasswords;
   }
 
   async getById(id: string): Promise<PasswordEntry | undefined> {
-    const db = await this.openDatabase();
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction([this.storeName], 'readonly');
-      const store = transaction.objectStore(this.storeName);
-      const request = store.get(id);
-
-      request.onsuccess = () => {
-        const entry = request.result;
-        if (entry) {
-          const parsedEntry = {
-            ...entry,
-            createdAt: new Date(entry.createdAt),
-            updatedAt: new Date(entry.updatedAt)
-          };
-          resolve(this.decryptSensitiveData(parsedEntry));
-        } else {
-          resolve(undefined);
-        }
-      };
-
-      request.onerror = () => {
-        reject(new Error('Failed to retrieve entry'));
-      };
-    });
+    const passwords = await this.loadFromStorage();
+    const entry = passwords.find(p => p.id === id);
+    return entry ? this.decryptSensitiveData(entry) : undefined;
   }
 
   async add(entry: Omit<PasswordEntry, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
-    const db = await this.openDatabase();
+    const passwords = await this.loadFromStorage();
     const id = this.generateId();
     const now = new Date();
     
@@ -140,32 +135,23 @@ class IndexedDBPasswordService implements PasswordDatabase {
 
     // Encripta dados sensíveis antes de salvar
     const encryptedEntry = this.encryptSensitiveData(newEntry);
-
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction([this.storeName], 'readwrite');
-      const store = transaction.objectStore(this.storeName);
-      const request = store.add(encryptedEntry);
-
-      request.onsuccess = () => {
-        resolve(id);
-      };
-
-      request.onerror = () => {
-        reject(new Error('Failed to add entry'));
-      };
-    });
+    
+    passwords.push(encryptedEntry);
+    await this.saveToStorage(passwords);
+    
+    return id;
   }
 
   async update(id: string, entry: Partial<Omit<PasswordEntry, 'id' | 'createdAt'>>): Promise<void> {
-    const db = await this.openDatabase();
-    const existingEntry = await this.getById(id);
+    const passwords = await this.loadFromStorage();
+    const index = passwords.findIndex(p => p.id === id);
     
-    if (!existingEntry) {
+    if (index === -1) {
       throw new Error('Entry not found');
     }
 
     const updatedEntry: PasswordEntry = {
-      ...existingEntry,
+      ...passwords[index],
       ...entry,
       id,
       updatedAt: new Date()
@@ -173,38 +159,23 @@ class IndexedDBPasswordService implements PasswordDatabase {
 
     // Encripta dados sensíveis antes de salvar
     const encryptedEntry = this.encryptSensitiveData(updatedEntry);
-
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction([this.storeName], 'readwrite');
-      const store = transaction.objectStore(this.storeName);
-      const request = store.put(encryptedEntry);
-
-      request.onsuccess = () => {
-        resolve();
-      };
-
-      request.onerror = () => {
-        reject(new Error('Failed to update entry'));
-      };
-    });
+    
+    passwords[index] = encryptedEntry;
+    await this.saveToStorage(passwords);
   }
 
   async delete(id: string): Promise<void> {
-    const db = await this.openDatabase();
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction([this.storeName], 'readwrite');
-      const store = transaction.objectStore(this.storeName);
-      const request = store.delete(id);
+    const passwords = await this.loadFromStorage();
+    const filteredPasswords = passwords.filter(p => p.id !== id);
+    await this.saveToStorage(filteredPasswords);
+  }
 
-      request.onsuccess = () => {
-        resolve();
-      };
-
-      request.onerror = () => {
-        reject(new Error('Failed to delete entry'));
-      };
-    });
+  /**
+   * Clear all passwords (utility method)
+   */
+  async clearAll(): Promise<void> {
+    await chrome.storage.local.remove(this.storageKey);
   }
 }
 
-export const passwordService = new IndexedDBPasswordService();
+export const passwordService = new ChromeStoragePasswordService();

@@ -142,11 +142,35 @@ class PasswordAnalysisService {
   }> {
     const now = new Date();
     return passwords
-      .map(({ id, updatedAt, website }) => ({
-        id,
-        website,
-        daysOld: Math.floor((now.getTime() - updatedAt.getTime()) / (1000 * 60 * 60 * 24))
-      }))
+      .map(({ id, updatedAt, website }) => {
+        try {
+          // Ensure we have a valid date
+          let validUpdatedAt: Date;
+          if (updatedAt instanceof Date && !isNaN(updatedAt.getTime())) {
+            validUpdatedAt = updatedAt;
+          } else {
+            // Try to parse as string if it's not a valid Date object
+            validUpdatedAt = new Date(updatedAt as any);
+            if (isNaN(validUpdatedAt.getTime())) {
+              console.warn('PasswordAnalysisService: Invalid updatedAt date for password, using current date:', updatedAt);
+              validUpdatedAt = new Date(); // Fallback to current date
+            }
+          }
+
+          return {
+            id,
+            website,
+            daysOld: Math.floor((now.getTime() - validUpdatedAt.getTime()) / (1000 * 60 * 60 * 24))
+          };
+        } catch (error) {
+          console.error('PasswordAnalysisService: Error processing updatedAt for old passwords:', error, { id, updatedAt, website });
+          return {
+            id,
+            website,
+            daysOld: 0 // Default to 0 days old if there's an error
+          };
+        }
+      })
       .filter(item => item.daysOld > daysOld);
   }
 
@@ -156,6 +180,21 @@ class PasswordAnalysisService {
     website: string;
     updatedAt: Date;
   }>): PasswordHealth {
+    console.log('PasswordAnalysisService: Analyzing password health for', passwords.length, 'passwords');
+    console.log('PasswordAnalysisService: Passwords data:', passwords);
+
+    if (!passwords || passwords.length === 0) {
+      console.log('PasswordAnalysisService: No passwords to analyze, returning empty health data');
+      return {
+        weak: 0,
+        duplicated: 0,
+        old: 0,
+        total: 0,
+        overallScore: 0,
+        recommendations: ['No passwords found. Add some passwords to see health analysis.']
+      };
+    }
+
     const strengthAnalysis = passwords.map(p => this.analyzePasswordStrength(p.password));
     const duplicates = this.findDuplicatePasswords(passwords);
     const oldPasswords = this.findOldPasswords(passwords);
@@ -164,6 +203,10 @@ class PasswordAnalysisService {
     const duplicated = duplicates.reduce((acc, dup) => acc + dup.count, 0);
     const old = oldPasswords.length;
     const total = passwords.length;
+
+    console.log('PasswordAnalysisService: Analysis results:', {
+      weak, duplicated, old, total, strengthAnalysis, duplicates, oldPasswords
+    });
 
     // Calculate overall score (0-100)
     const strengthScore = strengthAnalysis.reduce((acc, s) => acc + s.score, 0) / (total * 5) * 100;
@@ -190,7 +233,7 @@ class PasswordAnalysisService {
       recommendations.push('Your passwords are in great shape! 🎉');
     }
 
-    return {
+    const result = {
       weak,
       duplicated,
       old,
@@ -198,6 +241,9 @@ class PasswordAnalysisService {
       overallScore,
       recommendations
     };
+
+    console.log('PasswordAnalysisService: Final health result:', result);
+    return result;
   }
 
   generatePasswordAnalytics(passwords: Array<{
@@ -207,7 +253,20 @@ class PasswordAnalysisService {
     updatedAt: Date;
     createdAt: Date;
   }>): PasswordAnalytics {
+    console.log('PasswordAnalysisService: Generating analytics for', passwords.length, 'passwords');
+    
+    if (!passwords || passwords.length === 0) {
+      console.log('PasswordAnalysisService: No passwords for analytics, returning empty data');
+      return {
+        strengthDistribution: {},
+        averageStrength: 0,
+        mostCommonWeaknesses: [],
+        securityTrends: []
+      };
+    }
+
     const strengthAnalysis = passwords.map(p => this.analyzePasswordStrength(p.password));
+    console.log('PasswordAnalysisService: Strength analysis:', strengthAnalysis);
     
     // Strength distribution
     const strengthDistribution = strengthAnalysis.reduce((acc, analysis) => {
@@ -233,12 +292,15 @@ class PasswordAnalysisService {
     // Security trends (simplified - based on creation dates)
     const securityTrends = this.calculateSecurityTrends(passwords);
 
-    return {
+    const result = {
       strengthDistribution,
       averageStrength,
       mostCommonWeaknesses,
       securityTrends
     };
+
+    console.log('PasswordAnalysisService: Final analytics result:', result);
+    return result;
   }
 
   private calculateSecurityTrends(passwords: Array<{
@@ -249,15 +311,32 @@ class PasswordAnalysisService {
     const monthlyData = new Map<string, { scores: number[]; count: number }>();
 
     passwords.forEach(password => {
-      const month = password.createdAt.toISOString().substring(0, 7); // YYYY-MM
-      const strength = this.analyzePasswordStrength(password.password);
-      
-      if (!monthlyData.has(month)) {
-        monthlyData.set(month, { scores: [], count: 0 });
+      try {
+        // Ensure we have a valid date
+        let createdAt: Date;
+        if (password.createdAt instanceof Date && !isNaN(password.createdAt.getTime())) {
+          createdAt = password.createdAt;
+        } else {
+          // Try to parse as string if it's not a valid Date object
+          createdAt = new Date(password.createdAt as any);
+          if (isNaN(createdAt.getTime())) {
+            console.warn('PasswordAnalysisService: Invalid date for password, using current date:', password.createdAt);
+            createdAt = new Date(); // Fallback to current date
+          }
+        }
+
+        const month = createdAt.toISOString().substring(0, 7); // YYYY-MM
+        const strength = this.analyzePasswordStrength(password.password);
+        
+        if (!monthlyData.has(month)) {
+          monthlyData.set(month, { scores: [], count: 0 });
+        }
+        
+        monthlyData.get(month)!.scores.push(strength.score);
+        monthlyData.get(month)!.count++;
+      } catch (error) {
+        console.error('PasswordAnalysisService: Error processing date for security trends:', error, password);
       }
-      
-      monthlyData.get(month)!.scores.push(strength.score);
-      monthlyData.get(month)!.count++;
     });
 
     return Array.from(monthlyData.entries())

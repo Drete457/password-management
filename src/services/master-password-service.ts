@@ -127,8 +127,8 @@ class SecurityServiceImpl implements SecurityService {
     }));
 
     try {
-      // Save re-encrypted passwords
-      await chrome.storage.local.set({ passwords: reEncryptedPasswords });
+      // Save re-encrypted passwords using the same key as password service
+      await chrome.storage.local.set({ password_manager_passwords: reEncryptedPasswords });
 
       // Update master password hash
       this.state.masterPasswordHash = newHash;
