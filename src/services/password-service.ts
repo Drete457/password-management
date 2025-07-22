@@ -71,7 +71,10 @@ class ChromeStoragePasswordService implements PasswordDatabase {
    * Encripta dados sensíveis se o master password estiver configurado
    */
   private async encryptSensitiveData(entry: PasswordEntry): Promise<PasswordEntry> {
-    if (!(await securityService.isLocked())) {
+    // Check if master password is configured
+    const hasMasterPassword = await securityService.hasMasterPassword();
+    
+    if (hasMasterPassword && !(await securityService.isLocked())) {
       try {
         return {
           ...entry,
@@ -89,7 +92,10 @@ class ChromeStoragePasswordService implements PasswordDatabase {
    * Decripta dados sensíveis se estiverem encriptados
    */
   private async decryptSensitiveData(entry: PasswordEntry): Promise<PasswordEntry> {
-    if (!(await securityService.isLocked())) {
+    // Check if master password is configured
+    const hasMasterPassword = await securityService.hasMasterPassword();
+    
+    if (hasMasterPassword && !(await securityService.isLocked())) {
       try {
         const decryptedPassword = securityService.decryptData(entry.password);
         const decryptedUsername = securityService.decryptData(entry.username);
@@ -175,6 +181,68 @@ class ChromeStoragePasswordService implements PasswordDatabase {
    */
   async clearAll(): Promise<void> {
     await chrome.storage.local.remove(this.storageKey);
+  }
+
+  /**
+   * Re-encrypt all existing passwords when master password is set for the first time
+   */
+  async encryptExistingPasswords(): Promise<void> {
+    console.log('PasswordService: Re-encrypting all existing passwords...');
+    
+    try {
+      // Load raw data without decryption
+      const result = await chrome.storage.local.get(this.storageKey);
+      const rawPasswords = result[this.storageKey] || [];
+      
+      if (rawPasswords.length === 0) {
+        console.log('PasswordService: No passwords to encrypt');
+        return;
+      }
+
+      // Process each password - same logic as loadFromStorage
+      const processedPasswords = [];
+      for (const entry of rawPasswords) {
+        // Validate and convert dates
+        let createdAt: Date;
+        let updatedAt: Date;
+
+        try {
+          createdAt = entry.createdAt ? new Date(entry.createdAt) : new Date();
+          if (isNaN(createdAt.getTime())) {
+            createdAt = new Date();
+          }
+        } catch (error) {
+          createdAt = new Date();
+        }
+
+        try {
+          updatedAt = entry.updatedAt ? new Date(entry.updatedAt) : new Date();
+          if (isNaN(updatedAt.getTime())) {
+            updatedAt = new Date();
+          }
+        } catch (error) {
+          updatedAt = new Date();
+        }
+
+        const processedEntry = {
+          ...entry,
+          createdAt,
+          updatedAt
+        };
+
+        // Encrypt the entry
+        const encryptedEntry = await this.encryptSensitiveData(processedEntry);
+        processedPasswords.push(encryptedEntry);
+      }
+
+      // Save encrypted passwords
+      await this.saveToStorage(processedPasswords);
+      console.log(`PasswordService: Successfully encrypted ${processedPasswords.length} passwords`);
+      
+    } catch (error) {
+      console.error('PasswordService: Failed to encrypt existing passwords:', error);
+      throw new Error('Failed to encrypt existing passwords');
+    }
   }
 }
 

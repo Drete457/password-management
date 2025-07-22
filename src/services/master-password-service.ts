@@ -82,6 +82,17 @@ class SecurityServiceImpl implements SecurityService {
 
     await this.saveSecurityState();
     this.setAutoLockTimer(this.DEFAULT_AUTO_LOCK_MINUTES);
+    
+    // Encrypt all existing passwords with the new master password
+    try {
+      const passwordService = (await import('./password-service')).passwordService;
+      await passwordService.encryptExistingPasswords();
+      console.log('SecurityService: Successfully encrypted all existing passwords');
+    } catch (error) {
+      console.error('SecurityService: Failed to encrypt existing passwords:', error);
+      // Don't throw error here as the master password was set successfully
+      // The encryption of existing passwords is a secondary operation
+    }
   }
 
   async changeMasterPassword(currentPassword: string, newPassword: string): Promise<void> {
