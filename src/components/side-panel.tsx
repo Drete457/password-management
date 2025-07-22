@@ -61,16 +61,19 @@ export function SidePanel() {
   const initializeSecurity = async () => {
     try {
       const hasMP = await securityService.hasMasterPassword();
+      setHasMasterPassword(hasMP);
 
       if (hasMP) {
         const isLocked = securityService.isLocked();
-        setHasMasterPassword(hasMP);
         setIsVaultLocked(isLocked);
 
         // Only show unlock if has master password AND is locked AND it's the first initialization
-        if (hasMP && isLocked && !isInitialized) {
+        if (isLocked && !isInitialized) {
           setShowMasterPasswordUnlock(true);
         }
+      } else {
+        // No master password, vault is not locked
+        setIsVaultLocked(false);
       }
 
       setIsInitialized(true);
@@ -97,8 +100,8 @@ export function SidePanel() {
     try {
       setIsLoading(true);
 
-      // Don't load passwords if vault is locked
-      if (securityService.isLocked()) {
+      // Check if we have master password setup and vault is locked
+      if (hasMasterPassword && securityService.isLocked()) {
         setPasswords([]);
         return;
       }
