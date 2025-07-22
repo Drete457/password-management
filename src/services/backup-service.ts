@@ -96,10 +96,12 @@ class BackupPasswordService implements BackupService {
       // Check if vault is locked and throw error if needed
       const { securityService } = await import('./master-password-service');
       const hasMasterPassword = await securityService.hasMasterPassword();
+      console.log('Import: hasMasterPassword =', hasMasterPassword);
       
       // Only check if vault is locked when there's a master password configured
       if (hasMasterPassword) {
         const isLocked = await securityService.isLocked();
+        console.log('Import: isLocked =', isLocked);
         if (isLocked) {
           throw new Error('Vault is locked. Please unlock the vault before importing passwords.');
         }

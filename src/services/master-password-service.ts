@@ -194,7 +194,20 @@ class SecurityServiceImpl implements SecurityService {
    * Checks if the vault is locked
    */
   async isLocked(): Promise<boolean> {
+    console.log('SecurityService.isLocked(): Before loadSecurityState - current state:', {
+      isLocked: this.state.isLocked,
+      hasEncryptionKey: !!this.state.encryptionKey,
+      hasMasterPasswordHash: !!this.state.masterPasswordHash
+    });
+    
     await this.loadSecurityState();
+    
+    console.log('SecurityService.isLocked(): After loadSecurityState - final state:', {
+      isLocked: this.state.isLocked,
+      hasEncryptionKey: !!this.state.encryptionKey,
+      hasMasterPasswordHash: !!this.state.masterPasswordHash
+    });
+    
     return this.state.isLocked;
   }
 
@@ -310,7 +323,16 @@ class SecurityServiceImpl implements SecurityService {
       if (stored) {
         const data = JSON.parse(stored);
         this.state.masterPasswordHash = data.masterPasswordHash || null;
-        this.state.isLocked = data.masterPasswordHash ? true : false; // Always starts locked if has master password
+        
+        // Only set to locked if we don't have a master password OR if we're currently locked
+        // This prevents overriding the unlocked state when loading from storage
+        if (!data.masterPasswordHash) {
+          this.state.isLocked = false;
+        } else if (this.state.isLocked === undefined || this.state.encryptionKey === null) {
+          // Only set to locked if we haven't been initialized or don't have encryption key
+          this.state.isLocked = true;
+        }
+        // If we already have an encryption key, keep current locked state
       }
     } catch (error) {
       console.error('Failed to load security state:', error);
