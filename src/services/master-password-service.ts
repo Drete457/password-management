@@ -258,11 +258,14 @@ class SecurityServiceImpl implements SecurityService {
     
     // Clear all stored passwords and security data
     try {
-      await chrome.storage.local.clear(); // This clears ALL extension data
-      await this.saveSecurityState();
+      // Clear all chrome storage data
+      await chrome.storage.local.clear();
       
       // Also clear localStorage security state
       localStorage.removeItem(this.STORAGE_KEY);
+      
+      // Reinitialize storage state (without master password)
+      await this.saveSecurityState();
       
       console.log('Security: All data has been cleared');
     } catch (error) {

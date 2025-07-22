@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { PasswordEntry } from '../types/password';
 import { passwordService } from '../services/password-service';
 import { securityService } from '../services/master-password-service';
-import { migrationService } from '../services/migration-service';
 import { PasswordList } from './password-list';
 import { PasswordForm } from './password-form';
 import { ThemeSettings } from './theme-settings';
@@ -64,11 +63,6 @@ export function SidePanel() {
   const initializeSecurity = async () => {
     try {
       console.log('SidePanel: Starting security initialization...');
-      
-      // First, run data migration from IndexedDB to Chrome Storage
-      console.log('SidePanel: Running migration...');
-      await migrationService.performMigration();
-      console.log('SidePanel: Migration completed');
       
       const hasMP = await securityService.hasMasterPassword();
       console.log('SidePanel: Has master password:', hasMP);
