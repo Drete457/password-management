@@ -234,13 +234,16 @@
   }
 
   .themed-border {
-    border-color: var(--border-primary);
+    border: 2px solid var(--border-primary);
   }
 
   .themed-input {
     background-color: var(--bg-primary);
     color: var(--text-primary);
-    border-color: var(--border-primary);
+    border: 2px solid var(--border-primary);
+    border-radius: 0.375rem;
+    padding: 0.5rem 0.75rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
   }
 
   .themed-input::placeholder {
@@ -250,7 +253,32 @@
   .themed-input:focus {
     outline: none;
     border-color: var(--accent-500);
-    box-shadow: 0 0 0 3px rgba(var(--accent-500), 0.1);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  /* Enhanced input class with visible borders for all inputs */
+  .themed-input-enhanced {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    border: 2px solid var(--border-primary);
+    border-radius: 0.375rem;
+    padding: 0.5rem 0.75rem;
+    transition: all 0.15s ease-in-out;
+    width: 100%;
+  }
+
+  .themed-input-enhanced::placeholder {
+    color: var(--text-tertiary);
+  }
+
+  .themed-input-enhanced:focus {
+    outline: none;
+    border-color: var(--accent-500);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  .themed-input-enhanced:hover {
+    border-color: var(--border-secondary);
   }
 
   .themed-accent-bg {
