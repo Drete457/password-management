@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { PasswordEntry } from '../types/password';
 import { PasswordBreachIndicator } from './password-breach-indicator';
+import { PasswordQRCode } from './password-qr-code';
 
 interface PasswordListProps {
   passwords: PasswordEntry[];
@@ -11,6 +12,7 @@ interface PasswordListProps {
 
 export function PasswordList({ passwords, currentDomain, onEdit, onDelete }: PasswordListProps) {
   const [visiblePasswords, setVisiblePasswords] = useState<Set<string>>(new Set());
+  const [showQRPassword, setShowQRPassword] = useState<PasswordEntry | null>(null);
 
   const togglePasswordVisibility = (id: string) => {
     const newVisible = new Set(visiblePasswords);
@@ -68,6 +70,13 @@ export function PasswordList({ passwords, currentDomain, onEdit, onDelete }: Pas
                 <p className="text-sm themed-text-secondary truncate">{password.username}</p>
               </div>
               <div className="flex space-x-2 flex-shrink-0 ml-2">
+                <button
+                  onClick={() => setShowQRPassword(password)}
+                  className="themed-accent-text hover:text-[var(--accent-600)] text-sm p-1 hover:bg-[var(--accent-50)] rounded transition-colors"
+                  title="Show QR Code"
+                >
+                  📱
+                </button>
                 <button
                   onClick={() => onEdit(password)}
                   className="themed-accent-text hover:text-[var(--accent-600)] text-sm p-1 hover:bg-[var(--accent-50)] rounded transition-colors"
@@ -136,6 +145,15 @@ export function PasswordList({ passwords, currentDomain, onEdit, onDelete }: Pas
           </div>
         );
       })}
+      
+      {/* QR Code Modal */}
+      {showQRPassword && (
+        <PasswordQRCode
+          password={showQRPassword}
+          isOpen={!!showQRPassword}
+          onClose={() => setShowQRPassword(null)}
+        />
+      )}
     </div>
   );
 }
