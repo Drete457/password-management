@@ -1,4 +1,4 @@
-import React from 'react';
+import { ReactNode, Suspense } from 'react';
 
 interface LoadingSpinnerProps {
   size?: 'sm' | 'md' | 'lg';
@@ -20,14 +20,14 @@ export function LoadingSpinner({ size = 'md', className = '' }: LoadingSpinnerPr
 }
 
 interface SuspenseWrapperProps {
-  fallback?: React.ReactNode;
-  children: React.ReactNode;
+  children: ReactNode;
+  fallback?: ReactNode;
 }
 
 export function SuspenseWrapper({ fallback, children }: SuspenseWrapperProps) {
   return (
-    <React.Suspense fallback={fallback || <LoadingSpinner />}>
+    <Suspense fallback={fallback || <LoadingSpinner />}>
       {children}
-    </React.Suspense>
+    </Suspense>
   );
 }

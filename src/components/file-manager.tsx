@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { ChangeEvent, useState } from 'react';
 import { backupPasswordService } from '../services/backup-service';
 import { BackupSettings } from './backup-settings';
 
@@ -29,7 +29,7 @@ export function FileManager({ onImportComplete, onClose }: FileManagerProps) {
     }
   };
 
-  const handleImportFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImportFile = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 

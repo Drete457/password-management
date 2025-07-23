@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { FormEvent, useState } from 'react';
 import { securityService } from '../services/master-password-service';
 import { PasswordStrengthIndicator } from './password-strength-indicator';
 
@@ -43,7 +43,7 @@ export function MasterPasswordSetup({ onComplete, onClose }: MasterPasswordSetup
     return { isValid: true, message: 'Password is strong' };
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
 
@@ -185,7 +185,7 @@ export function MasterPasswordUnlock({ onUnlock, onClose, onReset }: MasterPassw
   const [error, setError] = useState('');
   const [attempts, setAttempts] = useState(0);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
@@ -361,7 +361,7 @@ export function MasterPasswordChange({ onComplete, onClose }: MasterPasswordChan
     return { isValid: true, message: '' };
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
 

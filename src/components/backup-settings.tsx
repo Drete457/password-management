@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, ChangeEvent } from 'react';
 import { backupPasswordService } from '../services/backup-service';
 import { securityService } from '../services/security-service';
 import type { BackupSettings } from '../types/backup';
@@ -81,7 +81,7 @@ export function BackupSettings({ onClose }: BackupSettingsProps) {
     }
   };
 
-  const handleImportFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImportFile = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 

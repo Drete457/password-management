@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, UIEvent, CSSProperties } from 'react';
 
 interface VirtualScrollOptions {
   itemHeight: number;
@@ -15,11 +15,11 @@ interface VirtualScrollResult<T> {
   totalHeight: number;
   scrollToIndex: (index: number) => void;
   containerProps: {
-    style: React.CSSProperties;
-    onScroll: (e: React.UIEvent<HTMLDivElement>) => void;
+    style: CSSProperties;
+    onScroll: (e: UIEvent<HTMLDivElement>) => void;
   };
   innerProps: {
-    style: React.CSSProperties;
+    style: CSSProperties;
   };
 }
 
@@ -59,7 +59,7 @@ export function useVirtualScroll<T>(
     return result;
   }, [items, visibleRange, itemHeight]);
 
-  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+  const handleScroll = useCallback((e: UIEvent<HTMLDivElement>) => {
     setScrollTop(e.currentTarget.scrollTop);
   }, []);
 

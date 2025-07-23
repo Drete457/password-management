@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback, CSSProperties, memo } from 'react';
 import { PasswordEntry } from '../types/password';
 import { PasswordBreachIndicator } from './password-breach-indicator';
 import { PasswordQRCode } from './password-qr-code';
@@ -17,14 +17,14 @@ interface PasswordItemProps {
   currentDomain?: string;
   onEdit: (password: PasswordEntry) => void;
   onDelete: (id: string) => void;
-  style: React.CSSProperties;
+  style: CSSProperties;
   visiblePasswords: Set<string>;
   onToggleVisibility: (id: string) => void;
   onShowQR: (password: PasswordEntry) => void;
 }
 
 // Memoized password item component to avoid unnecessary re-renders
-const PasswordItem = React.memo(({ 
+const PasswordItem = memo(({ 
   password, 
   currentDomain, 
   onEdit, 

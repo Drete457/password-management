@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, KeyboardEvent, FormEvent } from 'react';
 import { PasswordEntry } from '../types/password';
 import { PasswordStrengthIndicator, PasswordGenerator } from './password-strength-indicator';
 
@@ -46,14 +46,14 @@ export function PasswordForm({ password, currentDomain, onSave, onCancel }: Pass
     setTags(tags.filter(tag => tag !== tagToRemove));
   };
 
-  const handleTagKeyPress = (e: React.KeyboardEvent) => {
+  const handleTagKeyPress = (e: KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       addTag();
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     
     if (!website.trim() || !username.trim() || !passwordValue.trim()) {

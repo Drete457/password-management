@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, FC } from 'react';
 import QRCode from 'qrcode';
 import { PasswordEntry } from '../types/password';
 import { useTheme } from '../contexts/theme-context';
@@ -9,7 +9,7 @@ interface PasswordQRCodeProps {
   onClose: () => void;
 }
 
-export const PasswordQRCode: React.FC<PasswordQRCodeProps> = ({
+export const PasswordQRCode: FC<PasswordQRCodeProps> = ({
   password,
   isOpen,
   onClose

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { DependencyList, useEffect, useRef } from 'react';
 
 /**
  * A safe useEffect hook that prevents duplicate executions in development mode
@@ -6,7 +6,7 @@ import { useEffect, useRef } from 'react';
  */
 export function useDevSafeEffect(
   effect: () => void | (() => void),
-  deps?: React.DependencyList
+  deps?: DependencyList
 ): void {
   const hasExecuted = useRef(false);
   const cleanupRef = useRef<(() => void) | void>(undefined);
