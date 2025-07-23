@@ -39,7 +39,7 @@ interface ThemeProviderProps {
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
   const [theme, setTheme] = useState<ThemeSettings>(defaultTheme);
-  const [isDark, setIsDark] = useState(false);
+  const [isDark, setIsDark] = useState(true);
 
   // Load theme from storage on mount
   useEffect(() => {
