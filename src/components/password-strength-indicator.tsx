@@ -14,10 +14,6 @@ export function PasswordStrengthIndicator({
 }: PasswordStrengthIndicatorProps) {
   const [strength, setStrength] = useState<PasswordStrength | null>(null);
 
-  if (!strength || !password) {
-    return null;
-  }
-
   const getStrengthText = (level: string) => {
     const texts = {
       'very-weak': 'Very Weak',
@@ -48,6 +44,11 @@ export function PasswordStrengthIndicator({
       setStrength(null);
     }
   }, [password]);
+
+  // Return null only if there's no password or no strength analysis yet
+  if (!password || !strength) {
+    return null;
+  }
 
   return (
     <div className={`password-strength-container ${className}`}>
