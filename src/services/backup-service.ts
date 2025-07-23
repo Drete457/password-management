@@ -7,6 +7,7 @@ class BackupPasswordService implements BackupService {
   private readonly settingsKey = 'backup_settings';
   private readonly backupsKey = 'auto_backups';
   private backupTimer: number | null = null;
+  private isAutoBackupInitialized = false;
 
   private defaultSettings: BackupSettings = {
     autoBackupEnabled: false,
@@ -188,6 +189,13 @@ class BackupPasswordService implements BackupService {
   }
 
   autoBackup(): void {
+    // Prevent multiple initializations in development mode
+    if (this.isAutoBackupInitialized) {
+      console.log('Auto backup already initialized, skipping...');
+      return;
+    }
+    
+    this.isAutoBackupInitialized = true;
     this.startAutoBackup();
   }
 

@@ -47,6 +47,7 @@ class SecurityServiceImpl implements SecurityService {
   private readonly STORAGE_KEY = 'password_manager_security';
   private readonly SALT = 'password_manager_salt_2025';
   private readonly DEFAULT_AUTO_LOCK_MINUTES = 15;
+  private activityListenersSetup = false;
 
   constructor() {
     this.loadSecurityState();
@@ -297,18 +298,27 @@ class SecurityServiceImpl implements SecurityService {
   }
 
   /**
-   * Sets up listener for user activity
+   * Sets up listener for user activity - now singleton to prevent duplicates
    */
   private setupActivityListener(): void {
+    // Prevent multiple listeners in development mode
+    if (this.activityListenersSetup) {
+      return;
+    }
+    
+    this.activityListenersSetup = true;
+    
     // Listen for activity throughout the extension
     const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
     
+    const activityHandler = () => {
+      if (!this.state.isLocked) {
+        this.updateActivity();
+      }
+    };
+    
     events.forEach(event => {
-      document.addEventListener(event, () => {
-        if (!this.state.isLocked) {
-          this.updateActivity();
-        }
-      }, true);
+      document.addEventListener(event, activityHandler, true);
     });
   }
 

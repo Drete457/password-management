@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { PasswordEntry } from '../types/password';
 import { passwordService } from '../services/password-service';
 import { securityService } from '../services/master-password-service';
@@ -6,7 +6,7 @@ import { PasswordList } from './password-list';
 import { VirtualPasswordList } from './virtual-password-list';
 import { PasswordForm } from './password-form';
 import { LoadingSpinner, SuspenseWrapper } from './loading-spinner';
-import { useDebounce } from '../hooks/useDebounce';
+import { useDebounce, useOneTimeEffect } from '../hooks';
 import {
   LazyPasswordHealthDashboard,
   LazyBreachCheckComponent,
@@ -214,19 +214,33 @@ export function SidePanel() {
     return a.website.toLowerCase().localeCompare(b.website.toLowerCase());
   });
 
-  useEffect(() => {
-    initializeSecurity();
-    loadPasswords();
-    getCurrentDomain();
+  useOneTimeEffect(() => {
+    let isComponentMounted = true;
+    
+    const initializeComponent = async () => {
+      if (isComponentMounted) {
+        await initializeSecurity();
+        await loadPasswords();
+        await getCurrentDomain();
+        
+        // Initialize auto backup after component is loaded
+        const { backupPasswordService } = await import('../services/backup-service');
+        backupPasswordService.autoBackup();
+      }
+    };
+
+    initializeComponent();
 
     // Listen for tab changes
     const handleTabChange = () => {
-      getCurrentDomain();
+      if (isComponentMounted) {
+        getCurrentDomain();
+      }
     };
 
     // Listen for URL changes within the same tab
     const handleTabUpdate = (_: number, changeInfo: chrome.tabs.TabChangeInfo, tab: chrome.tabs.Tab) => {
-      if (changeInfo.url && tab.active) {
+      if (changeInfo.url && tab.active && isComponentMounted) {
         getCurrentDomain();
       }
     };
@@ -239,10 +253,11 @@ export function SidePanel() {
 
     // Cleanup listeners on component unmount
     return () => {
+      isComponentMounted = false;
       chrome.tabs.onActivated.removeListener(handleTabChange);
       chrome.tabs.onUpdated.removeListener(handleTabUpdate);
     };
-  }, []);
+  });
 
   return (
     <div className="h-full themed-bg-secondary flex flex-col">

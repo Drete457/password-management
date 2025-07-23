@@ -85,20 +85,30 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
 
   // Determine if dark mode should be active
   useEffect(() => {
+    let mediaQueryListener: ((e: MediaQueryListEvent) => void) | null = null;
+    
     const updateDarkMode = () => {
       if (theme.mode === 'auto') {
         const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
         setIsDark(mediaQuery.matches);
 
-        const handleChange = (e: MediaQueryListEvent) => setIsDark(e.matches);
-        mediaQuery.addEventListener('change', handleChange);
-        return () => mediaQuery.removeEventListener('change', handleChange);
+        mediaQueryListener = (e: MediaQueryListEvent) => setIsDark(e.matches);
+        mediaQuery.addEventListener('change', mediaQueryListener);
       } else {
         setIsDark(theme.mode === 'dark');
       }
     };
 
-    return updateDarkMode();
+    updateDarkMode();
+
+    // Cleanup function
+    return () => {
+      if (mediaQueryListener) {
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        mediaQuery.removeEventListener('change', mediaQueryListener);
+        mediaQueryListener = null;
+      }
+    };
   }, [theme.mode]);
 
   // Apply theme to document
