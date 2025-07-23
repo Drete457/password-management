@@ -1,6 +1,6 @@
 import { lazy } from 'react';
 
-// Lazy load components que são pesados ou usados condicionalmente
+// Lazy load components that are heavy or used conditionally
 export const LazyPasswordHealthDashboard = lazy(() => 
   import('./password-health-dashboard').then(module => ({
     default: module.PasswordHealthDashboard

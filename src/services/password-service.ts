@@ -142,7 +142,7 @@ class ChromeStoragePasswordService implements PasswordDatabase {
       updatedAt: now
     };
 
-    // Encripta dados sensíveis antes de salvar
+    // Encrypt sensitive data before saving
     const encryptedEntry = await this.encryptSensitiveData(newEntry);
     
     passwords.push(encryptedEntry);
@@ -166,7 +166,7 @@ class ChromeStoragePasswordService implements PasswordDatabase {
       updatedAt: new Date()
     };
 
-    // Encripta dados sensíveis antes de salvar
+    // Encrypt sensitive data before saving
     const encryptedEntry = await this.encryptSensitiveData(updatedEntry);
     
     passwords[index] = encryptedEntry;

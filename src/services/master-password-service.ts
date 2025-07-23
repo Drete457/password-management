@@ -408,7 +408,7 @@ class SecurityServiceImpl implements SecurityService {
         }
       }
 
-      // Validação de tipos
+      // Type validation
       if (typeof entry.id !== 'string' || 
           typeof entry.website !== 'string' || 
           typeof entry.username !== 'string' || 

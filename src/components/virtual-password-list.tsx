@@ -23,7 +23,7 @@ interface PasswordItemProps {
   onShowQR: (password: PasswordEntry) => void;
 }
 
-// Memoized password item component para evitar re-renders desnecessários
+// Memoized password item component to avoid unnecessary re-renders
 const PasswordItem = React.memo(({ 
   password, 
   currentDomain, 
@@ -171,7 +171,7 @@ export function VirtualPasswordList({
   const [visiblePasswords, setVisiblePasswords] = useState<Set<string>>(new Set());
   const [showQRPassword, setShowQRPassword] = useState<PasswordEntry | null>(null);
 
-  // Altura estimada de cada item (ajustar conforme necessário)
+  // Estimated height of each item (adjust as needed)
   const ITEM_HEIGHT = 200;
 
   const { virtualItems, containerProps, innerProps } = useVirtualScroll(

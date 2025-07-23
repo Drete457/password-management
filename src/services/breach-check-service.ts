@@ -61,7 +61,7 @@ class BreachCheckService {
         method: 'GET',
         headers: {
           'User-Agent': 'Password-Manager-Extension',
-          'Add-Padding': 'true' // Para adicionar padding extra de segurança
+          'Add-Padding': 'true' // To add extra security padding
         }
       });
 
@@ -108,7 +108,7 @@ class BreachCheckService {
   async checkMultiplePasswords(passwords: string[]): Promise<Map<string, BreachCheckResult>> {
     const results = new Map<string, BreachCheckResult>();
     
-    // Processar em batches pequenos para não sobrecarregar a API
+    // Process in small batches to avoid overloading the API
     const batchSize = 5;
     for (let i = 0; i < passwords.length; i += batchSize) {
       const batch = passwords.slice(i, i + batchSize);

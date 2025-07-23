@@ -18,7 +18,7 @@ export function BreachCheckComponent({ passwords, onClose }: BreachCheckComponen
   const [totalBreached, setTotalBreached] = useState(0);
 
   useEffect(() => {
-    // Inicializar com passwords sem informação de breach
+    // Initialize with passwords without breach information
     setPasswordsWithBreach(passwords.map(p => ({ ...p })));
   }, [passwords]);
 
