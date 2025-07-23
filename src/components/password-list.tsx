@@ -68,7 +68,7 @@ export function PasswordList({ passwords, currentDomain, onEdit, onDelete }: Pas
                     password.category === 'social' ? 'bg-pink-100 text-pink-800' :
                     'bg-gray-100 text-gray-800'
                   }`}>
-                    {password.category}
+                    {password.category.charAt(0).toUpperCase() + password.category.slice(1)}
                   </span>
                   {isCurrentDomain && (
                     <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-[var(--accent-100)] text-[var(--accent-700)] flex-shrink-0">
