@@ -122,14 +122,13 @@ export function PasswordGenerator({ onPasswordGenerated, className = '' }: Passw
       setGeneratedPassword(password);
       onPasswordGenerated(password);
       setIsGenerating(false);
-    }, 100); // Small delay for visual feedback
+    }, 100);
   };
 
   const copyToClipboard = async () => {
     if (generatedPassword) {
       try {
         await navigator.clipboard.writeText(generatedPassword);
-        // You could add a toast notification here
       } catch (error) {
         console.error('Failed to copy password:', error);
       }

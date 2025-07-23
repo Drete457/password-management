@@ -10,7 +10,7 @@ class BackupPasswordService implements BackupService {
 
   private defaultSettings: BackupSettings = {
     autoBackupEnabled: false,
-    backupInterval: 60, // 1 hour
+    backupInterval: 60, 
     maxBackups: 10,
     encryptionEnabled: true,
     lastBackupDate: undefined
@@ -225,7 +225,7 @@ class BackupPasswordService implements BackupService {
     // Set up recurring backup
     this.backupTimer = window.setInterval(
       performBackup,
-      settings.backupInterval * 60 * 1000 // Convert minutes to milliseconds
+      settings.backupInterval * 60 * 1000 
     );
   }
 

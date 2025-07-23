@@ -2,14 +2,14 @@ import CryptoJS from 'crypto-js';
 import { PasswordEntry } from '../types/password';
 
 export interface SecurityService {
-  // Funcionalidades existentes de integridade
+  // Existing integrity functionalities
   validateDataIntegrity(data: PasswordEntry[]): boolean;
   detectTampering(data: PasswordEntry[]): boolean;
   verifyExtensionIsolation(): Promise<boolean>;
   generateDataHash(data: PasswordEntry[]): Promise<string>;
   verifyDataHash(data: PasswordEntry[], expectedHash: string): Promise<boolean>;
   
-  // Novas funcionalidades de Master Password
+  // New Master Password functionalities
   lockVault(): void;
   unlockVault(masterPassword: string): Promise<boolean>;
   isLocked(): Promise<boolean>;

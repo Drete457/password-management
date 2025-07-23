@@ -58,13 +58,11 @@ Username: ${password.username}
 Password: ${password.password}${password.notes ? `
 Notes: ${password.notes}` : ''}`;
       await navigator.clipboard.writeText(text);
-      // You could add a toast notification here
     } catch (error) {
       console.error('Failed to copy credentials:', error);
     }
   };
 
-  // Generate QR code when modal opens
   useEffect(() => {
     if (isOpen && password) {
       generateQRCode();

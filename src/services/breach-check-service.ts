@@ -1,7 +1,7 @@
 /**
  * Breach Check Service
- * Verifica se passwords foram comprometidos usando a API HaveIBeenPwned
- * Utiliza k-anonymity para proteger a privacidade (apenas os primeiros 5 caracteres do SHA-1)
+ * Checks if passwords have been compromised using the HaveIBeenPwned API
+ * Uses k-anonymity to protect privacy (only the first 5 characters of SHA-1)
  */
 
 export interface BreachCheckResult {
@@ -24,7 +24,7 @@ class BreachCheckService {
   private readonly CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
 
   /**
-   * Gera SHA-1 hash de uma password
+   * Generates SHA-1 hash of a password
    */
   private async generateSHA1(password: string): Promise<string> {
     const encoder = new TextEncoder();
@@ -35,15 +35,15 @@ class BreachCheckService {
   }
 
   /**
-   * Verifica se uma password foi comprometida usando k-anonymity
-   * Envia apenas os primeiros 5 caracteres do hash SHA-1
+   * Checks if a password has been compromised using k-anonymity
+   * Sends only the first 5 characters of the SHA-1 hash
    */
   async checkPasswordBreach(password: string): Promise<BreachCheckResult> {
     try {
-      // Gerar hash SHA-1 da password
+      // Generate SHA-1 hash of the password
       const passwordHash = await this.generateSHA1(password);
       
-      // Verificar cache primeiro
+      // Check cache first
       const cached = this.getCachedResult(passwordHash);
       if (cached) {
         return {
@@ -52,11 +52,11 @@ class BreachCheckService {
         };
       }
 
-      // k-anonymity: usar apenas os primeiros 5 caracteres
+      // k-anonymity: use only the first 5 characters
       const hashPrefix = passwordHash.substring(0, 5);
       const hashSuffix = passwordHash.substring(5);
 
-      // Fazer request para a API
+      // Make request to the API
       const response = await fetch(`${this.API_BASE_URL}${hashPrefix}`, {
         method: 'GET',
         headers: {
@@ -72,7 +72,7 @@ class BreachCheckService {
       const responseText = await response.text();
       const hashes = responseText.split('\n');
 
-      // Procurar pelo sufixo do hash
+      // Search for the hash suffix
       let occurrences = 0;
       let isBreached = false;
 
@@ -85,7 +85,7 @@ class BreachCheckService {
         }
       }
 
-      // Cachear resultado
+      // Cache result
       this.cacheResult(passwordHash, password, isBreached, occurrences);
 
       return {
@@ -103,7 +103,7 @@ class BreachCheckService {
   }
 
   /**
-   * Verifica múltiplas passwords em batch
+   * Checks multiple passwords in batch
    */
   async checkMultiplePasswords(passwords: string[]): Promise<Map<string, BreachCheckResult>> {
     const results = new Map<string, BreachCheckResult>();
@@ -124,7 +124,7 @@ class BreachCheckService {
         results.set(password, result);
       });
 
-      // Pequeno delay entre batches para ser respeitoso com a API
+      // Small delay between batches to be respectful to the API
       if (i + batchSize < passwords.length) {
         await new Promise(resolve => setTimeout(resolve, 100));
       }
@@ -134,7 +134,7 @@ class BreachCheckService {
   }
 
   /**
-   * Obter resultado do cache se ainda válido
+   * Get result from cache if still valid
    */
   private getCachedResult(hash: string): PasswordBreachInfo | null {
     const cached = this.cache.get(hash);
@@ -150,7 +150,7 @@ class BreachCheckService {
   }
 
   /**
-   * Cachear resultado da verificação
+   * Cache the result of the check
    */
   private cacheResult(hash: string, password: string, isBreached: boolean, occurrences: number): void {
     this.cache.set(hash, {
@@ -161,7 +161,7 @@ class BreachCheckService {
       lastChecked: new Date()
     });
 
-    // Limitar tamanho do cache
+    // Limit cache size
     if (this.cache.size > 1000) {
       const firstKey = this.cache.keys().next().value;
       if (firstKey) {
@@ -171,14 +171,14 @@ class BreachCheckService {
   }
 
   /**
-   * Limpar cache
+   * Clear cache
    */
   clearCache(): void {
     this.cache.clear();
   }
 
   /**
-   * Obter estatísticas do cache
+   * Get cache statistics
    */
   getCacheStats(): { size: number; breachedCount: number } {
     let breachedCount = 0;
@@ -195,7 +195,7 @@ class BreachCheckService {
   }
 
   /**
-   * Verificar se uma password específica está no cache e foi comprometida
+   * Check if a specific password is in the cache and has been compromised
    */
   isPasswordInCache(password: string): PasswordBreachInfo | null {
     for (const info of this.cache.values()) {

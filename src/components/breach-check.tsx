@@ -21,7 +21,7 @@ export function BreachCheckComponent({ passwords, onClose }: BreachCheckComponen
     const passwordIndex = passwordsWithBreach.findIndex(p => p.id === passwordId);
     if (passwordIndex === -1) return;
 
-    // Marcar como "verificando"
+    // Mark as "checking"
     setPasswordsWithBreach(prev => prev.map((p, index) => 
       index === passwordIndex ? { ...p, isChecking: true } : p
     ));
@@ -59,7 +59,7 @@ export function BreachCheckComponent({ passwords, onClose }: BreachCheckComponen
     const passwordStrings = passwords.map(p => p.password);
     
     try {
-      // Marcar todos como "verificando"
+      // Mark all as "checking"
       setPasswordsWithBreach(passwords.map(p => ({ ...p, isChecking: true })));
 
       const results = await breachCheckService.checkMultiplePasswords(passwordStrings);
