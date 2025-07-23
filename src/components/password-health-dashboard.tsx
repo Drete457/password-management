@@ -27,14 +27,10 @@ export function PasswordHealthDashboard({ passwords, onPasswordEdit, onClose }: 
   }>>([]);
 
   const analyzePasswords = () => {
-    console.log('PasswordHealthDashboard: Starting password analysis...', passwords);
-    
     const healthData = passwordAnalysisService.analyzePasswordHealth(passwords);
-    console.log('PasswordHealthDashboard: Health data:', healthData);
     setHealth(healthData);
 
     const analyticsData = passwordAnalysisService.generatePasswordAnalytics(passwords);
-    console.log('PasswordHealthDashboard: Analytics data:', analyticsData);
     setAnalytics(analyticsData);
 
     // Find weak passwords
@@ -42,17 +38,14 @@ export function PasswordHealthDashboard({ passwords, onPasswordEdit, onClose }: 
       const strength = passwordAnalysisService.analyzePasswordStrength(p.password);
       return strength.score <= 2;
     });
-    console.log('PasswordHealthDashboard: Weak passwords:', weak);
     setWeakPasswords(weak);
 
     // Find duplicates
     const duplicates = passwordAnalysisService.findDuplicatePasswords(passwords);
-    console.log('PasswordHealthDashboard: Duplicates:', duplicates);
     setDuplicateGroups(duplicates);
 
     // Find old passwords
     const old = passwordAnalysisService.findOldPasswords(passwords);
-    console.log('PasswordHealthDashboard: Old passwords:', old);
     setOldPasswords(old);
   };
 

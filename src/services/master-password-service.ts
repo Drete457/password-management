@@ -88,11 +88,9 @@ class SecurityServiceImpl implements SecurityService {
     try {
       const passwordService = (await import('./password-service')).passwordService;
       await passwordService.encryptExistingPasswords();
-      console.log('SecurityService: Successfully encrypted all existing passwords');
+
     } catch (error) {
       console.error('SecurityService: Failed to encrypt existing passwords:', error);
-      // Don't throw error here as the master password was set successfully
-      // The encryption of existing passwords is a secondary operation
     }
   }
 
@@ -279,8 +277,6 @@ class SecurityServiceImpl implements SecurityService {
       
       // Reinitialize storage state (without master password)
       await this.saveSecurityState();
-      
-      console.log('Security: All data has been cleared');
     } catch (error) {
       console.error('Security: Failed to clear all data:', error);
       throw new Error('Failed to reset security data');

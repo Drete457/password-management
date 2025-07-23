@@ -180,11 +180,8 @@ class PasswordAnalysisService {
     website: string;
     updatedAt: Date;
   }>): PasswordHealth {
-    console.log('PasswordAnalysisService: Analyzing password health for', passwords.length, 'passwords');
-    console.log('PasswordAnalysisService: Passwords data:', passwords);
 
     if (!passwords || passwords.length === 0) {
-      console.log('PasswordAnalysisService: No passwords to analyze, returning empty health data');
       return {
         weak: 0,
         duplicated: 0,
@@ -203,10 +200,6 @@ class PasswordAnalysisService {
     const duplicated = duplicates.reduce((acc, dup) => acc + dup.count, 0);
     const old = oldPasswords.length;
     const total = passwords.length;
-
-    console.log('PasswordAnalysisService: Analysis results:', {
-      weak, duplicated, old, total, strengthAnalysis, duplicates, oldPasswords
-    });
 
     // Calculate overall score (0-100)
     const strengthScore = strengthAnalysis.reduce((acc, s) => acc + s.score, 0) / (total * 5) * 100;
@@ -242,7 +235,6 @@ class PasswordAnalysisService {
       recommendations
     };
 
-    console.log('PasswordAnalysisService: Final health result:', result);
     return result;
   }
 
@@ -253,10 +245,8 @@ class PasswordAnalysisService {
     updatedAt: Date;
     createdAt: Date;
   }>): PasswordAnalytics {
-    console.log('PasswordAnalysisService: Generating analytics for', passwords.length, 'passwords');
     
     if (!passwords || passwords.length === 0) {
-      console.log('PasswordAnalysisService: No passwords for analytics, returning empty data');
       return {
         strengthDistribution: {},
         averageStrength: 0,
@@ -266,7 +256,6 @@ class PasswordAnalysisService {
     }
 
     const strengthAnalysis = passwords.map(p => this.analyzePasswordStrength(p.password));
-    console.log('PasswordAnalysisService: Strength analysis:', strengthAnalysis);
     
     // Strength distribution
     const strengthDistribution = strengthAnalysis.reduce((acc, analysis) => {
@@ -299,7 +288,6 @@ class PasswordAnalysisService {
       securityTrends
     };
 
-    console.log('PasswordAnalysisService: Final analytics result:', result);
     return result;
   }
 

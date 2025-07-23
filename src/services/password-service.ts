@@ -17,7 +17,6 @@ class ChromeStoragePasswordService implements PasswordDatabase {
     try {
       const result = await chrome.storage.local.get(this.storageKey);
       const passwords = result[this.storageKey] || [];
-      console.log('PasswordService: Raw data from storage:', passwords);
       
       const processed = passwords.map((entry: any) => {
         // Validate and convert dates
@@ -54,11 +53,10 @@ class ChromeStoragePasswordService implements PasswordDatabase {
           tags: Array.isArray(entry.tags) ? entry.tags : [],
           notes: entry.notes || undefined
         };
-        console.log('PasswordService: Processing entry:', entry, '-> Processed:', processedEntry);
+
         return processedEntry;
       });
       
-      console.log('PasswordService: Final processed passwords:', processed);
       return processed;
     } catch (error) {
       console.error('Failed to load from chrome storage:', error);
@@ -116,11 +114,9 @@ class ChromeStoragePasswordService implements PasswordDatabase {
   }
 
   async getAll(): Promise<PasswordEntry[]> {
-    console.log('PasswordService: Loading passwords from storage...');
     const passwords = await this.loadFromStorage();
-    console.log('PasswordService: Raw passwords loaded:', passwords);
     const decryptedPasswords = await Promise.all(passwords.map(entry => this.decryptSensitiveData(entry)));
-    console.log('PasswordService: Decrypted passwords:', decryptedPasswords);
+ 
     return decryptedPasswords;
   }
 
@@ -190,15 +186,12 @@ class ChromeStoragePasswordService implements PasswordDatabase {
    * Re-encrypt all existing passwords when master password is set for the first time
    */
   async encryptExistingPasswords(): Promise<void> {
-    console.log('PasswordService: Re-encrypting all existing passwords...');
-    
     try {
       // Load raw data without decryption
       const result = await chrome.storage.local.get(this.storageKey);
       const rawPasswords = result[this.storageKey] || [];
       
       if (rawPasswords.length === 0) {
-        console.log('PasswordService: No passwords to encrypt');
         return;
       }
 
@@ -240,8 +233,6 @@ class ChromeStoragePasswordService implements PasswordDatabase {
 
       // Save encrypted passwords
       await this.saveToStorage(processedPasswords);
-      console.log(`PasswordService: Successfully encrypted ${processedPasswords.length} passwords`);
-      
     } catch (error) {
       console.error('PasswordService: Failed to encrypt existing passwords:', error);
       throw new Error('Failed to encrypt existing passwords');

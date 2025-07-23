@@ -42,15 +42,11 @@ export function SidePanel() {
 
   const initializeSecurity = async () => {
     try {
-      console.log('SidePanel: Starting security initialization...');
-      
       const hasMP = await securityService.hasMasterPassword();
-      console.log('SidePanel: Has master password:', hasMP);
       setHasMasterPassword(hasMP);
 
       if (hasMP) {
         const isLocked = await securityService.isLocked();
-        console.log('SidePanel: Vault locked:', isLocked);
         setIsVaultLocked(isLocked);
 
         // Only show unlock if has master password AND is locked AND it's the first initialization

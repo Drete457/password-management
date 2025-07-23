@@ -11,7 +11,7 @@ class BackupPasswordService implements BackupService {
 
   private defaultSettings: BackupSettings = {
     autoBackupEnabled: false,
-    backupInterval: 60, 
+    backupInterval: 60,
     maxBackups: 10,
     encryptionEnabled: true,
     lastBackupDate: undefined
@@ -32,7 +32,7 @@ class BackupPasswordService implements BackupService {
       const currentSettings = await this.getSettings();
       const newSettings = { ...currentSettings, ...settings };
       await chrome.storage.local.set({ [this.settingsKey]: newSettings });
-      
+
       // Restart auto backup if settings changed
       if (settings.autoBackupEnabled !== undefined || settings.backupInterval !== undefined) {
         this.startAutoBackup();
@@ -47,7 +47,7 @@ class BackupPasswordService implements BackupService {
     try {
       const passwords = await passwordService.getAll();
       const settings = await this.getSettings();
-      
+
       const backupData: BackupData = {
         passwords: passwords.map(p => ({
           ...p,
@@ -97,7 +97,7 @@ class BackupPasswordService implements BackupService {
       // Check if vault is locked and throw error if needed
       const { securityService } = await import('./master-password-service');
       const hasMasterPassword = await securityService.hasMasterPassword();
-      
+
       // Only check if vault is locked when there's a master password configured
       if (hasMasterPassword) {
         const isLocked = await securityService.isLocked();
@@ -120,17 +120,14 @@ class BackupPasswordService implements BackupService {
       }));
 
       // Clear existing passwords and import new ones
-      console.log('Starting import process...');
-      const currentPasswords = await passwordService.getAll();
-      console.log(`Found ${currentPasswords.length} existing passwords to clear`);
-      
+      await passwordService.getAll();
+
       // Clear all current passwords first
       await passwordService.clearAll();
 
-      console.log(`Importing ${passwords.length} new passwords...`);
       for (let i = 0; i < passwords.length; i++) {
         const password = passwords[i];
-        console.log(`Importing password ${i + 1}/${passwords.length}:`, password.website);
+
         try {
           await passwordService.add({
             website: password.website,
@@ -145,8 +142,6 @@ class BackupPasswordService implements BackupService {
           throw new Error(`Failed to import password for ${password.website}: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
       }
-      
-      console.log('Import completed successfully');
 
     } catch (error) {
       console.error('Failed to import data:', error);
@@ -191,10 +186,9 @@ class BackupPasswordService implements BackupService {
   autoBackup(): void {
     // Prevent multiple initializations in development mode
     if (this.isAutoBackupInitialized) {
-      console.log('Auto backup already initialized, skipping...');
       return;
     }
-    
+
     this.isAutoBackupInitialized = true;
     this.startAutoBackup();
   }
@@ -207,7 +201,7 @@ class BackupPasswordService implements BackupService {
     }
 
     const settings = await this.getSettings();
-    
+
     if (!settings.autoBackupEnabled) {
       return;
     }
@@ -217,11 +211,9 @@ class BackupPasswordService implements BackupService {
       try {
         const backupData = await this.exportData();
         await this.saveAutoBackup(backupData);
-        
+
         // Update last backup date
         await this.updateSettings({ lastBackupDate: new Date().toISOString() });
-        
-        console.log('Auto backup completed successfully');
       } catch (error) {
         console.error('Auto backup failed:', error);
       }
@@ -233,7 +225,7 @@ class BackupPasswordService implements BackupService {
     // Set up recurring backup
     this.backupTimer = window.setInterval(
       performBackup,
-      settings.backupInterval * 60 * 1000 
+      settings.backupInterval * 60 * 1000
     );
   }
 
