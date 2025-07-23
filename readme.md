@@ -164,7 +164,7 @@ A comprehensive password manager Chrome extension that provides secure storage, 
 5. **Search & Filter**: Use the search bar to quickly find specific passwords
 6. **Copy Credentials**: Use one-click copy buttons for usernames and passwords
 7. **Edit Entries**: Click the pencil icon ✏️ to modify existing passwords
-8. **Delete Entries**: Click the trash icon �️ to remove unwanted passwords
+8. **Delete Entries**: Click the trash icon 🗑️ to remove unwanted passwords
 
 ### Advanced Security Features
 1. **Health Dashboard**: Click the chart icon 📊 to analyze password security
@@ -328,8 +328,8 @@ src/
 ### Getting Started
 ```bash
 # Clone the repository
-git clone <repository-url>
-cd password-manager-extension
+git clone https://github.com/Drete457/password-management.git
+cd password-management
 
 # Install dependencies
 npm install
