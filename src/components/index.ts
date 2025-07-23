@@ -1,4 +1,5 @@
 export { PasswordList } from './password-list';
+export { VirtualPasswordList } from './virtual-password-list';
 export { PasswordForm } from './password-form';
 export { SidePanel } from './side-panel';
 export { ThemeSettings } from './theme-settings';
@@ -6,3 +7,4 @@ export { FileManager } from './file-manager';
 export { BackupSettings } from './backup-settings';
 export { PasswordQRCode } from './password-qr-code';
 export { RandomCodeGenerator } from './random-code-generator';
+export { LoadingSpinner, SuspenseWrapper } from './loading-spinner';

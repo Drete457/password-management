@@ -3,13 +3,20 @@ import { PasswordEntry } from '../types/password';
 import { passwordService } from '../services/password-service';
 import { securityService } from '../services/master-password-service';
 import { PasswordList } from './password-list';
+import { VirtualPasswordList } from './virtual-password-list';
 import { PasswordForm } from './password-form';
-import { ThemeSettings } from './theme-settings';
-import { FileManager } from './file-manager';
-import { PasswordHealthDashboard } from './password-health-dashboard';
-import { BreachCheckComponent } from './breach-check';
-import { MasterPasswordSetup, MasterPasswordUnlock, MasterPasswordChange } from './master-password';
-import { RandomCodeGenerator } from './random-code-generator';
+import { LoadingSpinner, SuspenseWrapper } from './loading-spinner';
+import { useDebounce } from '../hooks/useDebounce';
+import {
+  LazyPasswordHealthDashboard,
+  LazyBreachCheckComponent,
+  LazyFileManager,
+  LazyThemeSettings,
+  LazyRandomCodeGenerator,
+  LazyMasterPasswordSetup,
+  LazyMasterPasswordUnlock,
+  LazyMasterPasswordChange
+} from './lazy-components';
 import { useTheme } from '../contexts/theme-context';
 
 export function SidePanel() {
@@ -22,6 +29,7 @@ export function SidePanel() {
   const [showBreachCheck, setShowBreachCheck] = useState<boolean>(false);
   const [editingPassword, setEditingPassword] = useState<PasswordEntry | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const debouncedSearchTerm = useDebounce(searchTerm, 300); // Debounce por 300ms
   const [currentDomain, setCurrentDomain] = useState<string>('');
   const [showMasterPasswordSetup, setShowMasterPasswordSetup] = useState<boolean>(false);
   const [showMasterPasswordUnlock, setShowMasterPasswordUnlock] = useState<boolean>(false);
@@ -210,7 +218,7 @@ export function SidePanel() {
   };
 
   const filteredPasswords = passwords.filter(password => {
-    const searchLower = searchTerm.toLowerCase();
+    const searchLower = debouncedSearchTerm.toLowerCase();
     return (
       password.website.toLowerCase().includes(searchLower) ||
       password.username.toLowerCase().includes(searchLower) ||
@@ -326,41 +334,49 @@ export function SidePanel() {
 
       {!isVaultLocked && showThemeSettings && (
         <div className="p-4 themed-bg-primary border-b themed-border">
-          <ThemeSettings onClose={() => setShowThemeSettings(false)} />
+          <SuspenseWrapper fallback={<LoadingSpinner size="sm" />}>
+            <LazyThemeSettings onClose={() => setShowThemeSettings(false)} />
+          </SuspenseWrapper>
         </div>
       )}
 
       {!isVaultLocked && showFileManager && (
         <div className="p-4 themed-bg-primary border-b themed-border">
-          <FileManager
-            onImportComplete={loadPasswords}
-            onClose={() => setShowFileManager(false)}
-          />
+          <SuspenseWrapper fallback={<LoadingSpinner size="sm" />}>
+            <LazyFileManager
+              onImportComplete={loadPasswords}
+              onClose={() => setShowFileManager(false)}
+            />
+          </SuspenseWrapper>
         </div>
       )}
 
       {showHealthDashboard && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="max-w-4xl w-full max-h-[90vh]">
-            <PasswordHealthDashboard
-              passwords={passwords}
-              onPasswordEdit={(password) => {
-                setEditingPassword(password);
-                setShowForm(true);
-                setShowHealthDashboard(false);
-              }}
-              onClose={() => setShowHealthDashboard(false)}
-            />
+            <SuspenseWrapper fallback={<LoadingSpinner />}>
+              <LazyPasswordHealthDashboard
+                passwords={passwords}
+                onPasswordEdit={(password: PasswordEntry) => {
+                  setEditingPassword(password);
+                  setShowForm(true);
+                  setShowHealthDashboard(false);
+                }}
+                onClose={() => setShowHealthDashboard(false)}
+              />
+            </SuspenseWrapper>
           </div>
         </div>
       )}
 
       {showBreachCheck && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <BreachCheckComponent
-            passwords={passwords}
-            onClose={() => setShowBreachCheck(false)}
-          />
+          <SuspenseWrapper fallback={<LoadingSpinner />}>
+            <LazyBreachCheckComponent
+              passwords={passwords}
+              onClose={() => setShowBreachCheck(false)}
+            />
+          </SuspenseWrapper>
         </div>
       )}
 
@@ -425,61 +441,80 @@ export function SidePanel() {
             <div className="themed-text-secondary">Loading passwords...</div>
           </div>
         ) : (
-          <PasswordList
-            passwords={sortedPasswords}
-            currentDomain={currentDomain}
-            onEdit={handleEditPassword}
-            onDelete={handleDeletePassword}
-          />
+          // Use virtual scrolling for lists with many items (>50)
+          sortedPasswords.length > 50 ? (
+            <VirtualPasswordList
+              passwords={sortedPasswords}
+              currentDomain={currentDomain}
+              onEdit={handleEditPassword}
+              onDelete={handleDeletePassword}
+              containerHeight={600}
+            />
+          ) : (
+            <PasswordList
+              passwords={sortedPasswords}
+              currentDomain={currentDomain}
+              onEdit={handleEditPassword}
+              onDelete={handleDeletePassword}
+            />
+          )
         )}
       </main>
 
       {/* Master Password Modals */}
       {showMasterPasswordSetup && (
-        <MasterPasswordSetup
-          onComplete={async () => {
-            setShowMasterPasswordSetup(false);
-            setIsVaultLocked(false);
-            setHasMasterPassword(true);
-            loadPasswords();
-          }}
-          onClose={() => {
-            setShowMasterPasswordSetup(false);
-          }}
-        />
+        <SuspenseWrapper fallback={<LoadingSpinner />}>
+          <LazyMasterPasswordSetup
+            onComplete={async () => {
+              setShowMasterPasswordSetup(false);
+              setIsVaultLocked(false);
+              setHasMasterPassword(true);
+              loadPasswords();
+            }}
+            onClose={() => {
+              setShowMasterPasswordSetup(false);
+            }}
+          />
+        </SuspenseWrapper>
       )}
 
       {showMasterPasswordUnlock && (
-        <MasterPasswordUnlock
-          onUnlock={() => {
-            setShowMasterPasswordUnlock(false);
-            setIsVaultLocked(false);
-            loadPasswords();
-          }}
-          onClose={() => {
-            setShowMasterPasswordUnlock(false);
-          }}
-          onReset={handleVaultReset}
-        />
+        <SuspenseWrapper fallback={<LoadingSpinner />}>
+          <LazyMasterPasswordUnlock
+            onUnlock={() => {
+              setShowMasterPasswordUnlock(false);
+              setIsVaultLocked(false);
+              loadPasswords();
+            }}
+            onClose={() => {
+              setShowMasterPasswordUnlock(false);
+            }}
+            onReset={handleVaultReset}
+          />
+        </SuspenseWrapper>
       )}
 
       {showMasterPasswordChange && (
-        <MasterPasswordChange
-          onComplete={() => {
-            setShowMasterPasswordChange(false);
-            // Reload passwords after changing master password
-            loadPasswords();
-          }}
-          onClose={() => {
-            setShowMasterPasswordChange(false);
-          }}
-        />
+        <SuspenseWrapper fallback={<LoadingSpinner />}>
+          <LazyMasterPasswordChange
+            onComplete={() => {
+              setShowMasterPasswordChange(false);
+              // Reload passwords after changing master password
+              loadPasswords();
+            }}
+            onClose={() => {
+              setShowMasterPasswordChange(false);
+            }}
+          />
+        </SuspenseWrapper>
       )}
 
       {showRandomCodeGenerator && (
-        <RandomCodeGenerator
-          onClose={() => setShowRandomCodeGenerator(false)}
-        />
+        <SuspenseWrapper fallback={<LoadingSpinner />}>
+          <LazyRandomCodeGenerator
+            onClose={() => setShowRandomCodeGenerator(false)}
+          />
+        </SuspenseWrapper>
       )}
     </div>
   );

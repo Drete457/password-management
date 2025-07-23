@@ -347,6 +347,28 @@
     content: "🔒";
     @apply absolute top-2 right-2 text-green-500 text-sm;
   }
+
+  /* Virtual Scrolling Styles */
+  .password-list-container {
+    @apply relative;
+  }
+
+  .password-list-container::-webkit-scrollbar {
+    @apply w-2;
+  }
+
+  .password-list-container::-webkit-scrollbar-track {
+    @apply bg-[var(--bg-secondary)] rounded;
+  }
+
+  .password-list-container::-webkit-scrollbar-thumb {
+    @apply bg-[var(--border-primary)] rounded hover:bg-[var(--border-secondary)];
+  }
+
+  /* Loading Spinner */
+  .loading-spinner {
+    @apply animate-spin rounded-full border-2 border-[var(--border-primary)] border-t-[var(--accent-500)];
+  }
 }
 
 body {
