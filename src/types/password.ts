@@ -3,6 +3,9 @@ export interface PasswordEntry {
   website: string;
   username: string;
   password: string;
+  category: 'work' | 'personal' | 'shopping' | 'social' | 'other';
+  tags: string[];
+  notes?: string;
   createdAt: Date;
   updatedAt: Date;
 }

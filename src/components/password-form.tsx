@@ -13,6 +13,10 @@ export function PasswordForm({ password, currentDomain, onSave, onCancel }: Pass
   const [website, setWebsite] = useState<string>('');
   const [username, setUsername] = useState<string>('');
   const [passwordValue, setPasswordValue] = useState<string>('');
+  const [category, setCategory] = useState<'work' | 'personal' | 'shopping' | 'social' | 'other'>('personal');
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState<string>('');
+  const [notes, setNotes] = useState<string>('');
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showGenerator, setShowGenerator] = useState<boolean>(false);
 
@@ -21,10 +25,16 @@ export function PasswordForm({ password, currentDomain, onSave, onCancel }: Pass
       setWebsite(password.website);
       setUsername(password.username);
       setPasswordValue(password.password);
+      setCategory(password.category);
+      setTags(password.tags || []);
+      setNotes(password.notes || '');
     } else {
       setWebsite(currentDomain || '');
       setUsername('');
       setPasswordValue('');
+      setCategory('personal');
+      setTags([]);
+      setNotes('');
     }
   }, [password, currentDomain]);
 
@@ -42,6 +52,25 @@ export function PasswordForm({ password, currentDomain, onSave, onCancel }: Pass
     setShowGenerator(false);
   };
 
+  const addTag = () => {
+    const trimmedTag = tagInput.trim().toLowerCase();
+    if (trimmedTag && !tags.includes(trimmedTag)) {
+      setTags([...tags, trimmedTag]);
+      setTagInput('');
+    }
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    setTags(tags.filter(tag => tag !== tagToRemove));
+  };
+
+  const handleTagKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addTag();
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -53,7 +82,10 @@ export function PasswordForm({ password, currentDomain, onSave, onCancel }: Pass
     onSave({
       website: website.trim(),
       username: username.trim(),
-      password: passwordValue.trim()
+      password: passwordValue.trim(),
+      category,
+      tags,
+      notes: notes.trim() || undefined
     });
   };
 
@@ -90,6 +122,83 @@ export function PasswordForm({ password, currentDomain, onSave, onCancel }: Pass
           placeholder="e.g. your.email@example.com"
           className="w-full px-3 py-2 themed-border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--accent-500)] themed-bg-primary themed-text-primary"
           required
+        />
+      </div>
+
+      <div>
+        <label htmlFor="category" className="block text-sm font-medium themed-text-primary mb-1">
+          Category
+        </label>
+        <select
+          id="category"
+          value={category}
+          onChange={(e) => setCategory(e.target.value as 'work' | 'personal' | 'shopping' | 'social' | 'other')}
+          className="w-full px-3 py-2 themed-border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--accent-500)] themed-bg-primary themed-text-primary"
+        >
+          <option value="personal">🏠 Personal</option>
+          <option value="work">💼 Work</option>
+          <option value="shopping">🛒 Shopping</option>
+          <option value="social">👥 Social</option>
+          <option value="other">📂 Other</option>
+        </select>
+      </div>
+
+      <div>
+        <label htmlFor="tags" className="block text-sm font-medium themed-text-primary mb-1">
+          Tags
+        </label>
+        <div className="space-y-2">
+          <div className="flex">
+            <input
+              type="text"
+              id="tags"
+              value={tagInput}
+              onChange={(e) => setTagInput(e.target.value)}
+              onKeyPress={handleTagKeyPress}
+              placeholder="Add tags (press Enter)"
+              className="flex-1 px-3 py-2 themed-border rounded-l-md focus:outline-none focus:ring-2 focus:ring-[var(--accent-500)] themed-bg-primary themed-text-primary"
+            />
+            <button
+              type="button"
+              onClick={addTag}
+              className="px-4 py-2 themed-accent-bg hover:themed-accent-hover text-white rounded-r-md transition-colors"
+            >
+              Add
+            </button>
+          </div>
+          {tags.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="inline-flex items-center px-3 py-1 rounded-full text-sm themed-bg-secondary themed-text-primary themed-border"
+                >
+                  #{tag}
+                  <button
+                    type="button"
+                    onClick={() => removeTag(tag)}
+                    className="ml-2 text-red-500 hover:text-red-700 font-bold"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div>
+        <label htmlFor="notes" className="block text-sm font-medium themed-text-primary mb-1">
+          Notes (optional)
+        </label>
+        <textarea
+          id="notes"
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          placeholder="Additional notes about this password..."
+          rows={3}
+          className="w-full px-3 py-2 themed-border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--accent-500)] themed-bg-primary themed-text-primary resize-vertical"
         />
       </div>
 

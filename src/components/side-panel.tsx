@@ -207,10 +207,16 @@ export function SidePanel() {
     initializeSecurity();
   };
 
-  const filteredPasswords = passwords.filter(password =>
-    password.website.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    password.username.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredPasswords = passwords.filter(password => {
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      password.website.toLowerCase().includes(searchLower) ||
+      password.username.toLowerCase().includes(searchLower) ||
+      password.category.toLowerCase().includes(searchLower) ||
+      password.tags.some(tag => tag.toLowerCase().includes(searchLower)) ||
+      (password.notes && password.notes.toLowerCase().includes(searchLower))
+    );
+  });
 
   // Sort passwords: current domain first, then alphabetically
   const sortedPasswords = filteredPasswords.sort((a, b) => {

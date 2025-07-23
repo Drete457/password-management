@@ -49,7 +49,10 @@ class ChromeStoragePasswordService implements PasswordDatabase {
         const processedEntry = {
           ...entry,
           createdAt,
-          updatedAt
+          updatedAt,
+          category: entry.category || 'personal',
+          tags: Array.isArray(entry.tags) ? entry.tags : [],
+          notes: entry.notes || undefined
         };
         console.log('PasswordService: Processing entry:', entry, '-> Processed:', processedEntry);
         return processedEntry;

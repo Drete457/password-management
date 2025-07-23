@@ -111,6 +111,9 @@ class BackupPasswordService implements BackupService {
         website: entry.website,
         username: entry.username,
         password: entry.password,
+        category: entry.category || 'personal',
+        tags: Array.isArray(entry.tags) ? entry.tags : [],
+        notes: entry.notes || undefined,
         createdAt: new Date(entry.createdAt),
         updatedAt: new Date(entry.updatedAt)
       }));
@@ -131,7 +134,10 @@ class BackupPasswordService implements BackupService {
           await passwordService.add({
             website: password.website,
             username: password.username,
-            password: password.password
+            password: password.password,
+            category: password.category,
+            tags: password.tags,
+            notes: password.notes
           });
         } catch (error) {
           console.error(`Failed to import password ${i + 1}:`, error);

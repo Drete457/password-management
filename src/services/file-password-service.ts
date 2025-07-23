@@ -45,6 +45,9 @@ class FilePasswordService implements PasswordDatabase {
         website: entry.website || '',
         username: entry.username || '',
         password: entry.password || '',
+        category: entry.category || 'personal',
+        tags: Array.isArray(entry.tags) ? entry.tags : [],
+        notes: entry.notes || undefined,
         createdAt: entry.createdAt ? new Date(entry.createdAt) : new Date(),
         updatedAt: entry.updatedAt ? new Date(entry.updatedAt) : new Date()
       }));

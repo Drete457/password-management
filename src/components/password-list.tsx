@@ -61,6 +61,15 @@ export function PasswordList({ passwords, currentDomain, onEdit, onDelete }: Pas
               <div className="min-w-0 flex-1">
                 <div className="flex items-center space-x-2 mb-1">
                   <h3 className="font-medium themed-text-primary truncate">{password.website}</h3>
+                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium flex-shrink-0 ${
+                    password.category === 'work' ? 'bg-blue-100 text-blue-800' :
+                    password.category === 'personal' ? 'bg-green-100 text-green-800' :
+                    password.category === 'shopping' ? 'bg-purple-100 text-purple-800' :
+                    password.category === 'social' ? 'bg-pink-100 text-pink-800' :
+                    'bg-gray-100 text-gray-800'
+                  }`}>
+                    {password.category}
+                  </span>
                   {isCurrentDomain && (
                     <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-[var(--accent-100)] text-[var(--accent-700)] flex-shrink-0">
                       Current Site
@@ -68,6 +77,23 @@ export function PasswordList({ passwords, currentDomain, onEdit, onDelete }: Pas
                   )}
                 </div>
                 <p className="text-sm themed-text-secondary truncate">{password.username}</p>
+                {password.tags && password.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {password.tags.slice(0, 3).map((tag) => (
+                      <span
+                        key={tag}
+                        className="inline-flex items-center px-1.5 py-0.5 rounded text-xs themed-bg-secondary themed-text-secondary"
+                      >
+                        #{tag}
+                      </span>
+                    ))}
+                    {password.tags.length > 3 && (
+                      <span className="text-xs themed-text-tertiary">
+                        +{password.tags.length - 3} more
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
               <div className="flex space-x-2 flex-shrink-0 ml-2">
                 <button
@@ -137,6 +163,18 @@ export function PasswordList({ passwords, currentDomain, onEdit, onDelete }: Pas
                 {visiblePasswords.has(password.id) ? password.password : '••••••••••••'}
               </div>
             </div>
+
+            {/* Notes section */}
+            {password.notes && (
+              <div className="mb-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs themed-text-secondary uppercase tracking-wide">Notes</span>
+                </div>
+                <div className="text-sm themed-text-primary mt-1 line-clamp-2">
+                  {password.notes}
+                </div>
+              </div>
+            )}
 
             {/* Footer with date */}
             <div className="text-xs themed-text-tertiary border-t themed-border pt-2">

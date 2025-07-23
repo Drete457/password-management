@@ -35,8 +35,8 @@ export const PasswordQRCode: React.FC<PasswordQRCodeProps> = ({
     setError('');
 
     try {
-      // Simple format: "username password"
-      const qrData = `${password.username} ${password.password}`;
+      // Enhanced format: "website|category|username|password"
+      const qrData = `${password.website}|${password.category}|${password.username}|${password.password}`;
 
       // Generate QR code with theme-aware colors
       const qrUrl = await QRCode.toDataURL(qrData, {
@@ -60,7 +60,13 @@ export const PasswordQRCode: React.FC<PasswordQRCodeProps> = ({
 
   const copyCredentials = async () => {
     try {
-      const text = `${password.username} ${password.password}`;
+      // Include more comprehensive information
+      const text = `Website: ${password.website}
+Category: ${password.category}
+${password.tags.length > 0 ? `Tags: ${password.tags.join(', ')}` : ''}
+Username: ${password.username}
+Password: ${password.password}${password.notes ? `
+Notes: ${password.notes}` : ''}`;
       await navigator.clipboard.writeText(text);
       // You could add a toast notification here
     } catch (error) {
@@ -105,6 +111,39 @@ export const PasswordQRCode: React.FC<PasswordQRCodeProps> = ({
             <div className="mb-2">
               <span className={`text-sm font-medium ${
                 isDark ? 'text-gray-300' : 'text-gray-600'
+              }`}>Category:</span>
+              <span className={`ml-2 px-2 py-1 rounded-full text-xs font-medium ${
+                password.category === 'work' ? 'bg-blue-100 text-blue-800' :
+                password.category === 'personal' ? 'bg-green-100 text-green-800' :
+                password.category === 'shopping' ? 'bg-purple-100 text-purple-800' :
+                password.category === 'social' ? 'bg-pink-100 text-pink-800' :
+                'bg-gray-100 text-gray-800'
+              }`}>
+                {password.category}
+              </span>
+            </div>
+            {password.tags && password.tags.length > 0 && (
+              <div className="mb-2">
+                <span className={`text-sm font-medium ${
+                  isDark ? 'text-gray-300' : 'text-gray-600'
+                }`}>Tags:</span>
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {password.tags.map((tag, index) => (
+                    <span
+                      key={index}
+                      className={`px-2 py-1 rounded-full text-xs ${
+                        isDark ? 'bg-gray-600 text-gray-200' : 'bg-gray-200 text-gray-700'
+                      }`}
+                    >
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+            <div className="mb-2">
+              <span className={`text-sm font-medium ${
+                isDark ? 'text-gray-300' : 'text-gray-600'
               }`}>Username:</span>
               <p className={isDark ? 'text-gray-100' : 'text-gray-800'}>{password.username}</p>
             </div>
@@ -126,6 +165,16 @@ export const PasswordQRCode: React.FC<PasswordQRCodeProps> = ({
                 </button>
               </div>
             </div>
+            {password.notes && (
+              <div className="mb-2">
+                <span className={`text-sm font-medium ${
+                  isDark ? 'text-gray-300' : 'text-gray-600'
+                }`}>Notes:</span>
+                <p className={`text-sm mt-1 ${isDark ? 'text-gray-100' : 'text-gray-800'}`}>
+                  {password.notes}
+                </p>
+              </div>
+            )}
           </div>
 
           {/* QR Code Display */}
@@ -156,12 +205,12 @@ export const PasswordQRCode: React.FC<PasswordQRCodeProps> = ({
                   ✅ QR Code Generated!
                 </p>
                 <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                  Format: username password (separated by space)
+                  Format: website|category|username|password
                 </p>
                 <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
                   Scan to get: <code className={`px-1 rounded ${
                     isDark ? 'bg-gray-600 text-gray-200' : 'bg-gray-100 text-gray-800'
-                  }`}>{password.username} ••••••••</code>
+                  }`}>{password.website}|{password.category}|{password.username}|••••••••</code>
                 </p>
               </div>
             </div>
@@ -218,9 +267,10 @@ export const PasswordQRCode: React.FC<PasswordQRCodeProps> = ({
               isDark ? 'text-blue-300' : 'text-blue-700'
             }`}>
               <li>• Scan the QR code with any QR reader app</li>
-              <li>• The scanned text will be: "{password.username} [password]"</li>
+              <li>• The scanned text format: "website|category|username|password"</li>
+              <li>• Fields are separated by pipe (|) characters</li>
               <li>• Copy/paste the credentials where needed</li>
-              <li>• Username and password are separated by a single space</li>
+              <li>• Use "Copy" button for formatted text with all details</li>
             </ul>
           </div>
 
