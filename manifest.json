@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Password Manager",
   "description": "A password manager extension for secure storage and retrieval of passwords.",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "permissions": [
     "sidePanel",
     "storage",
