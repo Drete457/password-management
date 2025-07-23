@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "package": "npm run build && cd dist && tar -a -c -f ../extension-package.zip *",
+    "package:webstore": "npm run package && echo Extension package ready for Chrome Web Store: extension-package.zip"
   },
   "dependencies": {
     "@types/crypto-js": "^4.2.2",
