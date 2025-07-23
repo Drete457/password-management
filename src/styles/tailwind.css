@@ -149,7 +149,7 @@
   }
 
   .theme-settings-section-title {
-    @apply text-sm font-medium text-[var(--text-primary)] uppercase tracking-wide;
+    @apply text-sm font-medium text-[var(--text-primary)] tracking-wide;
   }
 
   /* Theme Options */

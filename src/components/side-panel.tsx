@@ -9,6 +9,7 @@ import { FileManager } from './file-manager';
 import { PasswordHealthDashboard } from './password-health-dashboard';
 import { BreachCheckComponent } from './breach-check';
 import { MasterPasswordSetup, MasterPasswordUnlock, MasterPasswordChange } from './master-password';
+import { RandomCodeGenerator } from './random-code-generator';
 import { useTheme } from '../contexts/theme-context';
 
 export function SidePanel() {
@@ -25,6 +26,7 @@ export function SidePanel() {
   const [showMasterPasswordSetup, setShowMasterPasswordSetup] = useState<boolean>(false);
   const [showMasterPasswordUnlock, setShowMasterPasswordUnlock] = useState<boolean>(false);
   const [showMasterPasswordChange, setShowMasterPasswordChange] = useState<boolean>(false);
+  const [showRandomCodeGenerator, setShowRandomCodeGenerator] = useState<boolean>(false);
   const [isVaultLocked, setIsVaultLocked] = useState<boolean>(false);
   const [hasMasterPassword, setHasMasterPassword] = useState<boolean>(false);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
@@ -378,12 +380,23 @@ export function SidePanel() {
         <button
           onClick={() => showForm ? setShowForm(false) : handleShowNewPasswordForm()}
           disabled={isVaultLocked}
-          className={`w-full font-medium py-2 px-4 rounded-md transition-colors ${isVaultLocked
+          className={`w-full font-medium py-2 px-4 rounded-md transition-colors mb-2 ${isVaultLocked
             ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
             : 'themed-accent-bg hover:themed-accent-hover text-white'
             }`}
         >
           {isVaultLocked ? 'Vault Locked' : showForm ? 'Cancel' : 'Add New Password'}
+        </button>
+        
+        <button
+          onClick={() => setShowRandomCodeGenerator(true)}
+          disabled={isVaultLocked}
+          className={`w-full font-medium py-2 px-4 rounded-md transition-colors ${isVaultLocked
+            ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+            : 'themed-accent-bg hover:themed-accent-hover text-white'
+            }`}
+        >
+          {isVaultLocked ? 'Vault Locked' : 'Generate Random Code'}
         </button>
       </div>
 
@@ -460,6 +473,12 @@ export function SidePanel() {
           onClose={() => {
             setShowMasterPasswordChange(false);
           }}
+        />
+      )}
+
+      {showRandomCodeGenerator && (
+        <RandomCodeGenerator
+          onClose={() => setShowRandomCodeGenerator(false)}
         />
       )}
     </div>
