@@ -365,7 +365,7 @@ export function SidePanel() {
       <div className="p-4 border-b themed-bg-primary themed-border">
         <input
           type="text"
-          placeholder={isVaultLocked ? "Unlock vault to search..." : "Search by website or username..."}
+          placeholder={isVaultLocked ? "Unlock vault to search..." : "Search by website, username, tag, notes..."}
           value={isVaultLocked ? "" : searchTerm}
           onChange={(e) => !isVaultLocked && setSearchTerm(e.target.value)}
           disabled={isVaultLocked}
