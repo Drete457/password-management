@@ -17,8 +17,6 @@ A comprehensive password manager Chrome extension that provides secure storage, 
 
 ### 🛡️ Security & Encryption
 - ✅ **Master Password Protection**: AES-256 encryption with PBKDF2 key derivation (10,000 iterations)
-- ✅ **Auto-lock Timer**: Automatic vault locking after 15 minutes of inactivity
-- ✅ **Activity Detection**: Resets timer on user interaction throughout the extension
 - ✅ **Memory Protection**: Encryption keys cleared from memory when locked
 - ✅ **Data Integrity Validation**: Tamper detection and data verification
 - ✅ **Extension Isolation**: Secure storage isolated from other extensions
@@ -61,14 +59,12 @@ A comprehensive password manager Chrome extension that provides secure storage, 
 - ✅ **Font Size Options**: Adjustable font sizes (small, medium, large)
 - ✅ **Responsive Design**: Optimized for different screen sizes and zoom levels
 - ✅ **Loading States**: Smooth loading animations and progress indicators
-- ✅ **Accessibility**: Keyboard navigation and screen reader support
 
 ## 🔒 Advanced Security Features
 
 ### Master Password Protection
 - **AES-256 Encryption**: All sensitive data encrypted with industry-standard encryption
 - **PBKDF2 Key Derivation**: 10,000 iterations for secure key generation from master password
-- **Auto-lock Timer**: Vault locks automatically after 15 minutes of inactivity
 - **Activity Detection**: Smart activity monitoring resets timer on user interaction
 - **Memory Protection**: Encryption keys completely cleared from memory when locked
 - **Session Management**: Secure session handling with automatic timeout
@@ -95,15 +91,12 @@ A comprehensive password manager Chrome extension that provides secure storage, 
 - **Security Score**: Overall password security rating with visual indicators
 - **Strength Distribution**: Breakdown of password strengths across your vault
 - **Risk Assessment**: Identification of high-risk passwords requiring immediate attention
-- **Trend Analysis**: Historical view of password security improvements over time
-- **Quick Actions**: Direct links to address security issues
 
 ### Detailed Analysis Tabs
 - **Weak Passwords**: List of passwords below security thresholds with improvement suggestions
 - **Duplicate Passwords**: Detection and management of reused passwords
 - **Old Passwords**: Identification of passwords that haven't been updated recently
 - **Breached Passwords**: Integration with breach databases for compromise detection
-- **Security Trends**: Visual charts showing security posture over time
 
 ## 🎲 Advanced Password Generation
 
@@ -115,11 +108,8 @@ A comprehensive password manager Chrome extension that provides secure storage, 
 - **Multiple Algorithms**: Various generation methods for different security needs
 
 ### Integration Features
-- **Form Auto-fill**: Direct integration with password forms
 - **Strength Validation**: Immediate strength assessment of generated passwords
 - **Custom Rules**: Configurable generation rules for specific requirements
-- **Batch Generation**: Generate multiple passwords simultaneously
-- **History Tracking**: Keep track of recently generated passwords
 
 ## 📱 QR Code Features
 
@@ -172,22 +162,19 @@ A comprehensive password manager Chrome extension that provides secure storage, 
 3. **Password Generation**: Use the built-in generator for strong, unique passwords
 4. **QR Code Sharing**: Generate QR codes for easy credential sharing (use with caution)
 5. **Backup Management**: Export encrypted backups regularly for data safety
-6. **Auto-lock**: The vault automatically locks after 15 minutes of inactivity
 
 ### Master Password Management
 1. **Unlock Vault**: Enter your master password when the vault is locked
 2. **Change Master Password**: Access settings to change your master password
-3. **Activity Monitoring**: The system tracks activity to manage auto-lock timing
-4. **Manual Lock**: Click the lock icon 🔒 to manually secure your vault
-5. **Session Persistence**: Unlocked sessions persist until timeout or manual lock
+3. **Manual Lock**: Click the lock icon 🔒 to manually secure your vault
+4. **Session Persistence**: Unlocked sessions persist until close or manual lock
 
 ### Password Health Monitoring
 1. **Security Overview**: View overall password security score and statistics
 2. **Weak Password Detection**: Identify and strengthen weak passwords
 3. **Duplicate Management**: Find and eliminate password reuse across accounts
-4. **Age Tracking**: Monitor and update old passwords regularly
-5. **Breach Alerts**: Receive notifications about compromised passwords
-6. **Improvement Suggestions**: Follow actionable recommendations for better security
+4. **Breach Alerts**: Receive notifications about compromised passwords
+5. **Improvement Suggestions**: Follow actionable recommendations for better security
 
 ### Backup & Data Management
 1. **Export Data**: Create JSON backups of all your passwords
@@ -434,13 +421,6 @@ This extension was architected with privacy and security as foundational princip
 - **Strength Requirements**: Follow strength indicators for optimal security
 - **Breach Response**: Immediately change passwords identified in breaches
 - **Category Organization**: Use categories and tags for better organization
-
-### Data Backup & Recovery
-- **Export Regularly**: Create encrypted backups of your password data
-- **Test Restores**: Periodically test backup restoration process
-- **Secure Storage**: Store backup files in secure, encrypted locations
-- **Multiple Copies**: Maintain multiple backup copies in different locations
-- **Version Control**: Keep dated backups for data recovery options
 
 ### System Requirements & Limitations
 - **Chrome/Chromium Only**: Extension requires Chrome or Chromium-based browsers
