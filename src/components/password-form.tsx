@@ -20,24 +20,6 @@ export function PasswordForm({ password, currentDomain, onSave, onCancel }: Pass
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showGenerator, setShowGenerator] = useState<boolean>(false);
 
-  useEffect(() => {
-    if (password) {
-      setWebsite(password.website);
-      setUsername(password.username);
-      setPasswordValue(password.password);
-      setCategory(password.category);
-      setTags(password.tags || []);
-      setNotes(password.notes || '');
-    } else {
-      setWebsite(currentDomain || '');
-      setUsername('');
-      setPasswordValue('');
-      setCategory('personal');
-      setTags([]);
-      setNotes('');
-    }
-  }, [password, currentDomain]);
-
   const generatePassword = () => {
     const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
     let result = '';
@@ -88,6 +70,24 @@ export function PasswordForm({ password, currentDomain, onSave, onCancel }: Pass
       notes: notes.trim() || undefined
     });
   };
+
+  useEffect(() => {
+    if (password) {
+      setWebsite(password.website);
+      setUsername(password.username);
+      setPasswordValue(password.password);
+      setCategory(password.category);
+      setTags(password.tags || []);
+      setNotes(password.notes || '');
+    } else {
+      setWebsite(currentDomain || '');
+      setUsername('');
+      setPasswordValue('');
+      setCategory('personal');
+      setTags([]);
+      setNotes('');
+    }
+  }, [password, currentDomain]);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">

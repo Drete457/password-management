@@ -11,18 +11,6 @@ export function PasswordBreachIndicator({ password, compact = false }: PasswordB
   const [isChecking, setIsChecking] = useState(false);
   const [hasChecked, setHasChecked] = useState(false);
 
-  useEffect(() => {
-    // Check if we have cached info for this password
-    const cached = breachCheckService.isPasswordInCache(password);
-    if (cached) {
-      setBreachInfo({
-        isBreached: cached.isBreached,
-        occurrences: cached.occurrences
-      });
-      setHasChecked(true);
-    }
-  }, [password]);
-
   const checkBreach = async () => {
     if (isChecking || hasChecked) return;
     
@@ -74,6 +62,19 @@ export function PasswordBreachIndicator({ password, compact = false }: PasswordB
 
     return <span className="text-xs text-green-600" title="Password is safe">✅</span>;
   }
+
+  useEffect(() => {
+    // Check if we have cached info for this password
+    const cached = breachCheckService.isPasswordInCache(password);
+    if (cached) {
+      setBreachInfo({
+        isBreached: cached.isBreached,
+        occurrences: cached.occurrences
+      });
+      setHasChecked(true);
+    }
+  }, [password]);
+
 
   // Full version for detailed view
   return (

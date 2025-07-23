@@ -14,15 +14,6 @@ export function PasswordStrengthIndicator({
 }: PasswordStrengthIndicatorProps) {
   const [strength, setStrength] = useState<PasswordStrength | null>(null);
 
-  useEffect(() => {
-    if (password) {
-      const analysis = passwordAnalysisService.analyzePasswordStrength(password);
-      setStrength(analysis);
-    } else {
-      setStrength(null);
-    }
-  }, [password]);
-
   if (!strength || !password) {
     return null;
   }
@@ -48,6 +39,15 @@ export function PasswordStrengthIndicator({
     };
     return icons[level as keyof typeof icons] || '❓';
   };
+
+  useEffect(() => {
+    if (password) {
+      const analysis = passwordAnalysisService.analyzePasswordStrength(password);
+      setStrength(analysis);
+    } else {
+      setStrength(null);
+    }
+  }, [password]);
 
   return (
     <div className={`password-strength-container ${className}`}>

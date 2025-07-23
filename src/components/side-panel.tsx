@@ -20,6 +20,7 @@ import {
 import { useTheme } from '../contexts/theme-context';
 
 export function SidePanel() {
+  const { isDark } = useTheme();
   const [passwords, setPasswords] = useState<PasswordEntry[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showForm, setShowForm] = useState<boolean>(false);
@@ -38,37 +39,6 @@ export function SidePanel() {
   const [isVaultLocked, setIsVaultLocked] = useState<boolean>(false);
   const [hasMasterPassword, setHasMasterPassword] = useState<boolean>(false);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
-  const { isDark } = useTheme();
-
-  useEffect(() => {
-    initializeSecurity();
-    loadPasswords();
-    getCurrentDomain();
-
-    // Listen for tab changes
-    const handleTabChange = () => {
-      getCurrentDomain();
-    };
-
-    // Listen for URL changes within the same tab
-    const handleTabUpdate = (_: number, changeInfo: chrome.tabs.TabChangeInfo, tab: chrome.tabs.Tab) => {
-      if (changeInfo.url && tab.active) {
-        getCurrentDomain();
-      }
-    };
-
-    // Add tab activation listener
-    chrome.tabs.onActivated.addListener(handleTabChange);
-
-    // Add tab update listener for URL changes within the same tab
-    chrome.tabs.onUpdated.addListener(handleTabUpdate);
-
-    // Cleanup listeners on component unmount
-    return () => {
-      chrome.tabs.onActivated.removeListener(handleTabChange);
-      chrome.tabs.onUpdated.removeListener(handleTabUpdate);
-    };
-  }, []);
 
   const initializeSecurity = async () => {
     try {
@@ -243,6 +213,36 @@ export function SidePanel() {
     // For same priority level, sort alphabetically by website
     return a.website.toLowerCase().localeCompare(b.website.toLowerCase());
   });
+
+  useEffect(() => {
+    initializeSecurity();
+    loadPasswords();
+    getCurrentDomain();
+
+    // Listen for tab changes
+    const handleTabChange = () => {
+      getCurrentDomain();
+    };
+
+    // Listen for URL changes within the same tab
+    const handleTabUpdate = (_: number, changeInfo: chrome.tabs.TabChangeInfo, tab: chrome.tabs.Tab) => {
+      if (changeInfo.url && tab.active) {
+        getCurrentDomain();
+      }
+    };
+
+    // Add tab activation listener
+    chrome.tabs.onActivated.addListener(handleTabChange);
+
+    // Add tab update listener for URL changes within the same tab
+    chrome.tabs.onUpdated.addListener(handleTabUpdate);
+
+    // Cleanup listeners on component unmount
+    return () => {
+      chrome.tabs.onActivated.removeListener(handleTabChange);
+      chrome.tabs.onUpdated.removeListener(handleTabUpdate);
+    };
+  }, []);
 
   return (
     <div className="h-full themed-bg-secondary flex flex-col">

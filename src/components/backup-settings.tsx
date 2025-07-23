@@ -19,12 +19,6 @@ export function BackupSettings({ onClose }: BackupSettingsProps) {
   const [showSecurityInfo, setShowSecurityInfo] = useState(false);
   const [securityStatus, setSecurityStatus] = useState<any>(null);
 
-  useEffect(() => {
-    loadSettings();
-    loadAutoBackups();
-    loadSecurityInfo();
-  }, []);
-
   const loadSecurityInfo = async () => {
     try {
       const status = await securityService.checkSecurityStatus();
@@ -186,6 +180,12 @@ export function BackupSettings({ onClose }: BackupSettingsProps) {
     const hours = Math.floor(minutes / 60);
     return `${hours} hour${hours > 1 ? 's' : ''}`;
   };
+
+  useEffect(() => {
+    loadSettings();
+    loadAutoBackups();
+    loadSecurityInfo();
+  }, []);
 
   if (isLoading || !settings) {
     return (

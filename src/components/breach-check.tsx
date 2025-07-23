@@ -17,11 +17,6 @@ export function BreachCheckComponent({ passwords, onClose }: BreachCheckComponen
   const [isCheckingAll, setIsCheckingAll] = useState(false);
   const [totalBreached, setTotalBreached] = useState(0);
 
-  useEffect(() => {
-    // Initialize with passwords without breach information
-    setPasswordsWithBreach(passwords.map(p => ({ ...p })));
-  }, [passwords]);
-
   const checkSinglePassword = async (passwordId: string) => {
     const passwordIndex = passwordsWithBreach.findIndex(p => p.id === passwordId);
     if (passwordIndex === -1) return;
@@ -119,6 +114,11 @@ export function BreachCheckComponent({ passwords, onClose }: BreachCheckComponen
 
   const breachedPasswords = passwordsWithBreach.filter(p => p.breachInfo?.isBreached);
   const checkedPasswords = passwordsWithBreach.filter(p => p.breachInfo && !p.isChecking);
+
+  useEffect(() => {
+    // Initialize with passwords without breach information
+    setPasswordsWithBreach(passwords.map(p => ({ ...p })));
+  }, [passwords]);
 
   return (
     <div className="themed-bg-primary rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] overflow-hidden">

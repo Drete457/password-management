@@ -26,12 +26,6 @@ export function PasswordHealthDashboard({ passwords, onPasswordEdit, onClose }: 
     daysOld: number;
   }>>([]);
 
-  useEffect(() => {
-    if (passwords.length > 0) {
-      analyzePasswords();
-    }
-  }, [passwords]);
-
   const analyzePasswords = () => {
     console.log('PasswordHealthDashboard: Starting password analysis...', passwords);
     
@@ -75,6 +69,12 @@ export function PasswordHealthDashboard({ passwords, onPasswordEdit, onClose }: 
   };
 
   const findPasswordById = (id: string) => passwords.find(p => p.id === id);
+
+  useEffect(() => {
+    if (passwords.length > 0) {
+      analyzePasswords();
+    }
+  }, [passwords]);
 
   if (!health || !analytics) {
     return (
