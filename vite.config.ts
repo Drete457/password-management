@@ -5,7 +5,7 @@ import { crx, defineManifest } from '@crxjs/vite-plugin';
 const manifest = defineManifest({
   manifest_version: 3,
   name: "SecurePass Analytics - Smart Password Manager",
-  description: "Smart password manager with security analytics, breach detection, strength scoring, QR sharing, and comprehensive password health dashboard.",
+  description: "Smart password manager with encryption, breach alerts, and health monitoring.",
   version: "0.1.0",
   permissions: [
     "sidePanel",
