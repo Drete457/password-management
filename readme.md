@@ -1,6 +1,6 @@
-# Password Manager - Chrome Extension
+# SecurePass Analytics - Smart Password Manager
 
-A comprehensive password manager Chrome extension that provides secure storage, management, and analysis of your credentials with advanced security features, breach detection, and modern UI components.
+A comprehensive smart password manager Chrome extension that provides secure storage, management, and analysis of your credentials with advanced security features, breach detection, and modern UI components.
 
 ## ✨ Core Features
 

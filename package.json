@@ -1,5 +1,5 @@
 {
-  "name": "password-manager-extension",
+  "name": "securepass-analytics-extension",
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -7,8 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "package": "npm run build && cd dist && tar -a -c -f ../extension-package.zip *",
-    "package:webstore": "npm run package && echo Extension package ready for Chrome Web Store: extension-package.zip"
+    "package": "npm run build && cd dist && tar -a -c -f ../extension/extension-package.zip *",
+    "package:webstore": "npm run package && echo Extension package ready for Chrome Web Store: extension/extension-package.zip"
   },
   "dependencies": {
     "@types/crypto-js": "^4.2.2",
