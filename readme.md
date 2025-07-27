@@ -315,7 +315,7 @@ src/
 ### Getting Started
 ```bash
 # Clone the repository
-git clone https://github.com/Drete457/password-management.git
+git clone https://github.com/Drete457/securepass-analytics-extension.git
 cd password-management
 
 # Install dependencies
